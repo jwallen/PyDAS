@@ -1,0 +1,22 @@
+################################################################################
+#
+#   Files for git to ignore
+#
+################################################################################
+
+# Compiled libraries
+*.a
+*.so
+*.lib
+*.pyd
+
+# Temporary build files
+*.o
+*.obj
+*.c
+
+# Python bytecode
+*.pyc
+
+# Compiled Cython HTML output
+*.html
