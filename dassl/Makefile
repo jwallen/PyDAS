@@ -6,19 +6,19 @@
 
 F77=gfortran
 
-CFLAGS=-fPIC
+CFLAGS=-fPIC -O3
 
-OBJ=daux.o ddassl.o dlinpk.o
+DOBJ=daux.o ddassl.o dlinpk.o
 
-LIB=libddassl.a
+DLIB=libddassl.a
 
-all: dassl
+all: ddassl
 
-dassl: $(OBJ)
-	ar rcs $(LIB) $(OBJ)
+ddassl: $(DOBJ)
+	ar rcs $(DLIB) $(DOBJ)
 
 %.o: %.f
 	$(F77) $(CFLAGS) -c $< -o $@
 	
 clean:
-	rm $(LIB) $(OBJ)
+	rm $(DLIB) $(DOBJ)
