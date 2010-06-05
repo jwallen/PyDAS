@@ -12,9 +12,9 @@ DOBJ=daux.o ddassl.o dlinpk.o
 
 DLIB=libddassl.a
 
-all: ddassl
+all: $(DLIB)
 
-ddassl: $(DOBJ)
+$(DLIB): $(DOBJ)
 	ar rcs $(DLIB) $(DOBJ)
 
 %.o: %.f
