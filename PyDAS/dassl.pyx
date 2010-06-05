@@ -54,7 +54,7 @@ cimport cython
 ################################################################################
 
 # Expose the (double-precision) DASSL function
-cdef extern from "dassl/ddassl.h":
+cdef extern from "ddassl.h":
 	int ddassl_(
 		void* res,      # The residual function that defines the ODE/DAE system
 		int* neq,       # The number of equations to be solved
