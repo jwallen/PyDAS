@@ -4,6 +4,9 @@
 #
 ################################################################################
 
+# Compiled documentation
+documentation/build/*
+
 # Compiled libraries
 *.a
 *.so
