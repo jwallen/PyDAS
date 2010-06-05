@@ -1,33 +1,33 @@
 ################################################################################
 #
-#   PyDAS - A Python wrapper to the DASSL, DASPK, and DASKR solvers
+#   PyDAS - A Python wrapper for several differential algebraic system solvers
 #
-#	Copyright (c) 2010 Joshua W. Allen (jwallen@mit.edu)
+#   Copyright (c) 2010 by Joshua W. Allen (jwallen@mit.edu)
 #
-#	Permission is hereby granted, free of charge, to any person obtaining a
-#	copy of this software and associated documentation files (the 'Software'),
-#	to deal in the Software without restriction, including without limitation
-#	the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#	and/or sell copies of the Software, and to permit persons to whom the
-#	Software is furnished to do so, subject to the following conditions:
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the 'Software'),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
 #
-#	The above copyright notice and this permission notice shall be included in
-#	all copies or substantial portions of the Software.
+#   The above copyright notice and this permission notice shall be included in
+#   all copies or substantial portions of the Software.
 #
-#	THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#	DEALINGS IN THE SOFTWARE.
+#   THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
 
 """
-This Cython module exposes the DASSL differential algebraic system solver to
-Python and provides a Python extension type, the :class:`DASSL` base class,
-for working with DASSL.
+This `Cython <http://www.cython.org/>`_ module exposes the DASSL differential 
+algebraic system solver to Python and provides a Python extension type, the 
+:class:`DASSL` base class, for working with DASSL.
 
 To use DASSL, write a Python class or Cython extension type that derives from
 the :class:`DASSL` class and implement the :meth:`residual`
@@ -95,11 +95,15 @@ cdef class DASSL:
 	A base class for using the DASSL differential algebraic system solver by
 	L. R. Petzold. DASSL can be used to solve systems of the form
 	
-	.. math:: \\mathbf{g} \\left(t, \\mathbf{y}, \\frac{d \\mathbf{y}}{dt} \\right) = 0
+	.. math:: \\mathbf{g} \\left(t, \\mathbf{y}, \\frac{d \\mathbf{y}}{dt} \\right) = \\mathbf{0}
 	
 	where :math:`t` is the independent variable and :math:`\\mathbf{y}` is the
 	vector of dependent variables. DASSL uses the backward differentiation
 	formulas of orders one through five, and so is suitable for stiff problems.
+	In particular, DASSL is much more robust than VODE, the solver used by
+	SciPy.
+	
+	The DASSL solver options can be set by modifying the following attributes:
 	
 	=================== =================== ====================================
 	Attribute           Type                Description
@@ -114,6 +118,8 @@ cdef class DASSL:
 	`nonnegative`       ``bool``            :data:`True` to force nonnegativity constraint on dependent variable, :data:`False` if not
 	=================== =================== ====================================
 	
+	These options are passed to DASSL when the :meth:`initialize()` method is
+	called.
 	"""
 	
 	cdef public int maxOrder
@@ -144,7 +150,7 @@ cdef class DASSL:
 		self.bandwidths = bandwidths
 		self.nonnegative = nonnegative
 	
-	cpdef initialize(self, double t0, y0, dydt0=None, atol=1e-8, rtol=1e-4):
+	cpdef initialize(self, double t0, y0, dydt0=None, atol=1e-16, rtol=1e-8):
 		"""
 		Initialize the DASSL solver by setting the initial values of the
 		independent variable `t0`, dependent variables `y0`, and first
@@ -283,7 +289,10 @@ cdef class DASSL:
 	cpdef advance(self, double tout):
 		"""
 		Simulate from the current value of the independent variable to a 
-		specified value `tout`, taking as many steps as necessary.
+		specified value `tout`, taking as many steps as necessary. The resulting
+		values of :math:`t`, :math:`\\mathbf{y}`, and 
+		:math:`\\frac{d \\mathbf{y}}{dt}` can then be accessed via the `t`, `y`,
+		and `dydt` attributes.
 		"""
 		
 		# Tell DASSL to return solution at tout
@@ -294,7 +303,10 @@ cdef class DASSL:
 	cpdef step(self, double tout):
 		"""
 		Perform one simulation step from the current value of the independent 
-		variable toward (but not past) a specified value `tout`.
+		variable toward (but not past) a specified value `tout`. The resulting
+		values of :math:`t`, :math:`\\mathbf{y}`, and 
+		:math:`\\frac{d \\mathbf{y}}{dt}` can then be accessed via the `t`, `y`,
+		and `dydt` attributes.
 		"""
 		
 		# Tell DASSL to only take one simulation step towards tout
@@ -320,7 +332,6 @@ cdef class DASSL:
 		cdef void* jac = <void*> 0
 		if self.info[4] == 1:
 			jac = <void*> jacobian
-		
 		
 		# Call DASSL
 		self.idid = ddassl_(
