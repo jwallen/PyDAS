@@ -48,6 +48,14 @@ class Model(dassl.DASSL):
 		delta[1] =  self.k1 * y[0] - self.k2 * y[1] - dydt[1]
 		delta[2] =  self.k2 * y[1] - dydt[2]
 		return delta, 0
+	
+	#def jacobian(self, t, y, dydt, cj):
+		#pd = -cj * numpy.identity(y.shape[0], numpy.float64)
+		#pd[0,0] += -self.k1
+		#pd[1,0] += self.k1
+		#pd[1,1] += -self.k2
+		#pd[2,1] += self.k2
+		#return pd
 
 ################################################################################
 
@@ -63,16 +71,22 @@ if __name__ == '__main__':
 	
 	# Initialize the model
 	model = Model(k1=1.0, k2=0.25)
-	model.initialize(0, [1.0, 0.0, 0.0])
-	# Take a small initial step, short enough that it is before the time
-	# scale of interest
-	model.step(1e-10)
+	t0 = 0.0; y0 = numpy.array([1.0, 0.0, 0.0], numpy.float64)
+	# Since the model is explicit -- dy/dt = f(t, y) -- it is easy to
+	# evaluate dydt0; doing this is recommended because it lets DASSL
+	# choose a proper initial time step
+	dydt0 = model.residual(t0, y0, numpy.zeros(3, numpy.float64))[0]
+	model.initialize(t0, y0, dydt0)
 	
 	# Generate the solution by stepping until tmax is reached
+	# This will give you the solution at time points automatically selected
+	# by the solver
 	iter = 0
 	while iter < maxiter and model.t < tmax:
 		model.step(tmax)
 		t.append(model.t)
+		# You must make a copy of y because it is overwritten by DASSL at
+		# each call to step()
 		y.append(model.y.copy())
 	
 	# Convert the solution vectors to numpy arrays
