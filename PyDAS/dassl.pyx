@@ -296,10 +296,13 @@ cdef class DASSL:
 		and `dydt` attributes.
 		"""
 		
+		cdef int idid
+		
 		# Tell DASSL to return solution at tout
 		self.info[2] = 0 
 		# Call DASSL
-		self.solve(tout)
+		idid = self.solve(tout)
+		return idid
 		
 	cpdef step(self, double tout):
 		"""
@@ -310,10 +313,13 @@ cdef class DASSL:
 		and `dydt` attributes.
 		"""
 		
+		cdef int idid
+		
 		# Tell DASSL to only take one simulation step towards tout
 		self.info[2] = 1
 		# Call DASSL
-		self.solve(tout)
+		idid = self.solve(tout)
+		return idid
 		
 	cdef solve(self, double tout):
 		"""
@@ -335,7 +341,7 @@ cdef class DASSL:
 			jac = <void*> jacobian
 		
 		# Call DASSL
-		self.idid = ddassl_(
+		ddassl_(
 			res,
 			&(neq),
 			&(self.t),
@@ -354,6 +360,10 @@ cdef class DASSL:
 			<int*> self.ipar.data,
 			jac
 		)
+		
+		# DASSL wrote onto the self.idid parameter automatically
+		# Let's return it to the user
+		return self.idid
 		
 	@cython.boundscheck(False)
 	def residual(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt):
