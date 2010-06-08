@@ -334,6 +334,7 @@ cdef class DASSL:
 		cdef int neq = self.y.shape[0]
 		cdef int lrw = self.rwork.shape[0]
 		cdef int liw = self.iwork.shape[0]
+		cdef bint first = True
 		
 		cdef void* res = <void*> residual
 		cdef void* jac = <void*> 0
@@ -341,25 +342,30 @@ cdef class DASSL:
 			jac = <void*> jacobian
 		
 		# Call DASSL
-		ddassl_(
-			res,
-			&(neq),
-			&(self.t),
-			<np.float64_t*> self.y.data,
-			<np.float64_t*> self.dydt.data,
-			&(tout),
-			<int*> self.info.data,
-			<np.float64_t*> self.rtol.data,
-			<np.float64_t*> self.atol.data,
-			&(self.idid),
-			<np.float64_t*> self.rwork.data,
-			&(lrw),
-			<int*> self.iwork.data,
-			&(liw),
-			<np.float64_t*> self.rpar.data,
-			<int*> self.ipar.data,
-			jac
-		)
+		while first or self.idid == -1:
+			ddassl_(
+				res,
+				&(neq),
+				&(self.t),
+				<np.float64_t*> self.y.data,
+				<np.float64_t*> self.dydt.data,
+				&(tout),
+				<int*> self.info.data,
+				<np.float64_t*> self.rtol.data,
+				<np.float64_t*> self.atol.data,
+				&(self.idid),
+				<np.float64_t*> self.rwork.data,
+				&(lrw),
+				<int*> self.iwork.data,
+				&(liw),
+				<np.float64_t*> self.rpar.data,
+				<int*> self.ipar.data,
+				jac
+			)
+			first = False
+			if self.idid == -1:
+				print('Attempting another 500 steps...')
+				self.info[0] = 1
 		
 		# DASSL wrote onto the self.idid parameter automatically
 		# Let's return it to the user
