@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	# Since the model is explicit -- dy/dt = f(t, y) -- it is easy to
 	# evaluate dydt0; doing this is recommended because it lets DASSL
 	# choose a proper initial time step
-	dydt0 = model.residual(t0, y0, numpy.zeros(3, numpy.float64))[0]
+	dydt0 = - model.residual(t0, y0, numpy.zeros(3, numpy.float64))[0]
 	model.initialize(t0, y0, dydt0)
 	
 	# Generate the solution by stepping until tmax is reached
