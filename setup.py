@@ -36,7 +36,7 @@ if __name__ == '__main__':
 	from Cython.Distutils import build_ext
 	
 	# Turn on HTML annotation file generation (useful for 
-	import Cython.Compiler
+	import Cython.Compiler.Options
 	Cython.Compiler.Options.annotate = True
 	
 	# The Cython modules to setup
