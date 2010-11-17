@@ -417,5 +417,5 @@ cdef void jacobian(double* t, double* y, double* yprime, double* pd, double* cj,
 	N = jac.shape[0]
 	for i in range(N):
 		for j in range(N):
-			pd[i*N+j] = jac[i,j]
+			pd[j*N+i] = jac[i,j]
 
