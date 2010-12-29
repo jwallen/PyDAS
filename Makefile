@@ -4,12 +4,15 @@
 #
 ################################################################################
 
-include make.inc
+-include make.inc
 
 all: DASSL DASPK DASKR cython
 
 cython:
 	python setup.py build_ext $(CYTHON_FLAGS)
+
+install:
+	python setup.py install
 
 DASSL:
 	$(MAKE) -C dassl F77=$(F77)
@@ -20,12 +23,16 @@ DASPK:
 DASKR:
 	$(MAKE) -C daskr F77=$(F77)
 
-clean:
-	python setup.py clean $(CLEAN_FLAGS)
+clean: clean-DASSL clean-DASPK clean-DASKR clean-cython
+
+clean-DASSL:
 	$(MAKE) -C dassl clean
+
+clean-DASPK:
 	$(MAKE) -C daspk clean
+
+clean-DASKR:
 	$(MAKE) -C daskr clean
-	rm -f PyDAS/*.so PyDAS/*.pyc
 
 clean-cython:
 	python setup.py clean $(CLEAN_FLAGS)

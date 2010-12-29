@@ -3,7 +3,7 @@
 
 ################################################################################
 #
-#   RMG - Reaction Mechanism Generator
+#   PyDAS - A Python wrapper to several differential algebraic system solvers
 #
 #   Copyright (c) 2010 by Joshua W. Allen (jwallen@mit.edu)
 #
@@ -30,28 +30,34 @@
 import numpy
 
 if __name__ == '__main__':
-	
-	from distutils.core import setup
-	from distutils.extension import Extension
-	from Cython.Distutils import build_ext
-	
-	# Turn on HTML annotation file generation (useful for 
-	import Cython.Compiler.Options
-	Cython.Compiler.Options.annotate = True
-	
-	# The Cython modules to setup
-	ext_modules = [
-		Extension('PyDAS.dassl', ['PyDAS/dassl.pyx'], include_dirs=['PyDAS', numpy.get_include()], library_dirs=['dassl'], libraries=['gfortran', 'ddassl']),
-	]
+    
+    from distutils.core import setup
+    from distutils.extension import Extension
+    from Cython.Distutils import build_ext
+    
+    # Turn on HTML annotation file generation
+    import Cython.Compiler.Options
+    Cython.Compiler.Options.annotate = True
+    
+    # The Cython extension modules to compile
+    ext_modules = [
+        Extension(
+            'PyDAS.dassl', 
+            ['PyDAS/dassl.pyx'], 
+            include_dirs=['PyDAS', numpy.get_include()], 
+            libraries=['gfortran'], 
+            extra_objects=['dassl/daux.o','dassl/ddassl.o','dassl/dlinpk.o'],
+        ),
+    ]
 
-	# Run the setup command
-	setup(name='PyDAS',
-		version='0.1.0',
-		description='A Python wrapper to several differential algebraic system solvers',
-		author='Joshua W. Allen',
-		author_email='jwallen@mit.edu',
-		url='',
-		packages=['PyDAS'],
-		cmdclass = {'build_ext': build_ext},
-		ext_modules = ext_modules
-	)
+    # Run the setup command
+    setup(name='PyDAS',
+        version='0.1.0',
+        description='A Python wrapper to several differential algebraic system solvers',
+        author='Joshua W. Allen',
+        author_email='jwallen@mit.edu',
+        url='http://github.com/jwallen/PyDAS',
+        packages=['PyDAS'],
+        cmdclass = {'build_ext': build_ext},
+        ext_modules = ext_modules
+    )
