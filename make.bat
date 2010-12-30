@@ -1,7 +1,7 @@
 @echo off
 
 :: Set the Fortran compiler and compiler flags
-set f77=__gfortran
+set f77=gfortran
 set cflags=-O3
 
 echo Compiling DASSL...
