@@ -23,10 +23,10 @@ and k1 = 1.0 and k2 = 0.25.
 import sys
 sys.path.append('.')
 
-import PyDAS.dassl as dassl
+from pydas import DASSL
 import numpy
 
-class Model(dassl.DASSL):
+class Model(DASSL):
 	"""
 	A model of first-order irreversible reactions in series
 	
