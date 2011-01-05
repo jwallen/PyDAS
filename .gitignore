@@ -14,6 +14,7 @@ documentation/build/*
 *.pyd
 
 # Temporary build files
+build/*
 *.o
 *.obj
 *.c
