@@ -21,8 +21,5 @@ documentation/build/*
 # Python bytecode
 *.pyc
 
-# Compiled Cython HTML output
-*.html
-
 # make.inc (this file may vary significantly from platform to platform)
 make.inc
