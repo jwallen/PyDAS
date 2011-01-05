@@ -42,9 +42,9 @@ if __name__ == '__main__':
     # The Cython extension modules to compile
     ext_modules = [
         Extension(
-            'PyDAS.dassl', 
-            ['PyDAS/dassl.pyx'], 
-            include_dirs=['PyDAS', numpy.get_include()], 
+            'pydas', 
+            ['pydas.pyx'], 
+            include_dirs=['.', numpy.get_include()], 
             libraries=['gfortran'], 
             extra_objects=['dassl/daux.o','dassl/ddassl.o','dassl/dlinpk.o'],
         ),
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         author='Joshua W. Allen',
         author_email='jwallen@mit.edu',
         url='http://github.com/jwallen/PyDAS',
-        packages=['PyDAS'],
+        py_modules=['pydas'],
         cmdclass = {'build_ext': build_ext},
         ext_modules = ext_modules
     )
