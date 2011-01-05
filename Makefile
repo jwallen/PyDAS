@@ -36,7 +36,7 @@ clean-DASKR:
 
 clean-cython:
 	python setup.py clean $(CLEAN_FLAGS)
-	rm -f PyDAS/*.so PyDAS/*.pyc
+	rm -f *.so *.pyc
 
 help:
 	@echo ""
