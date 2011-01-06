@@ -7,8 +7,3 @@ PyDAS Developers' Guide
     :numbered:
     
     
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

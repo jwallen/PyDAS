@@ -9,8 +9,5 @@ PyDAS Users' Guide
     introduction
     installation
     tutorial
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    cython
 
