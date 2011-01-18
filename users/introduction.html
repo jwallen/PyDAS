@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Introduction &mdash; PyDAS v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyDAS v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="PyDAS Users’ Guide" href="index.html" />
+    <link rel="next" title="2. Installation" href="installation.html" />
+    <link rel="prev" title="PyDAS Users’ Guide" href="index.html" /> 
+  </head>
+  <body>
+    <div class="header">
+         <img src="../_static/pydas_logo.png" alt="PyDAS" />
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="2. Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PyDAS Users’ Guide"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Differential equations are frequently encountered in a variety of technical
+fields. For example, scientists and engineers often express mathematical models
+of physical phenomena as a set of differential (and possibly some algebraic)
+equations. These models can quickly become complicated enough that direct
+analytical solutions are difficult or impossible to obtain. In these cases,
+computers can be used to numerically generate approximate solutions.</p>
+<p>A system of differential algebraic equations (DAEs for short) is a set of
+equations that implicitly relate an independent variable <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/>, a set of
+dependent variables <img class="math" src="../_images/math/54514d3a40b9ad5be29d3f8fdd2a50b95eea1213.png" alt="\vector{y}"/>, and the set of first derivatives
+<img class="math" src="../_images/math/7b1fead457ac50c5c2d63aea27d73f25d37c3ff5.png" alt="d\vector{y}/dt"/>. (Throughout this documentation, we use boldface to
+indicate a vector quantity.) The general form is</p>
+<div class="math">
+<p><img src="../_images/math/67b6a436d4443df03cf590758927073b20c94509.png" alt="\vector{g} \left( t, \vector{y}, \frac{d\vector{y}}{dt} \right) = \vector{0}" /></p>
+</div><p>Most DAE systems can be expressed in the above form using the appropriate
+transformations (e.g. finite differencing).</p>
+<p>In 1982 the first version of DASSL, a Fortran code for efficient solving of DAE
+systems of the above form, was released by Petzold <a class="reference internal" href="#petzold1982">[Petzold1982]</a>. In 1989 and
+2002 the first versions of DASPK and DASKR, descendants of the DASSL code with
+a number of advanced features, were released by Brown, Hindmarsh, Petzold, and
+Ulrich.</p>
+<table class="docutils citation" frame="void" id="petzold1982" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Petzold1982]</a></td><td>L. R. Petzold. &#8220;A Description of DASSL: A
+Differential/Algebraic System Solver.&#8221; Sandia National Laboratories report
+SAND82-8637 (1982).</td></tr>
+</tbody>
+</table>
+<div class="section" id="why-pydas">
+<h2>1.1. Why PyDAS?<a class="headerlink" href="#why-pydas" title="Permalink to this headline">¶</a></h2>
+<p>DASSL, DASPK, and DASKR are written in Fortran 77, which is not much fun to
+code in, especially for novice programmers. Even after the vast improvements
+in the language in Fortran 90/95, the task can seem daunting. (In particular,
+getting data into and out of a Fortran program via file input and output is
+still quite difficult and awkward.) However, the strength of Fortran is that
+it produces code that is very efficient to execute, which is often important
+when solving DAEs.</p>
+<p>Meanwhile, the Python programming language is much easier to program in. In
+particular, Python comes with a large library of free, open source packages
+that provide a wide range of functionality, limiting the amount of work the
+programmer needs to do from scratch. A number of packages, including
+<a class="reference external" href="http://numpy.scipy.org/">NumPy</a>, <a class="reference external" href="http://www.scipy.org/">SciPy</a>, and
+<a class="reference external" href="http://matplotlib.sourceforge.net/">matplotlib</a>, replace much of the
+functionality of numerical computing environments such as MATLAB. However,
+the differential equation functionality within SciPy is insufficient for
+many complex DAE systems.</p>
+<p>PyDAS provides Python programmers with access to a much more robust DAE
+solver by providing an interface to the DASSL code from Python.</p>
+</div>
+<div class="section" id="should-i-use-pydas">
+<h2>1.2. Should I Use PyDAS?<a class="headerlink" href="#should-i-use-pydas" title="Permalink to this headline">¶</a></h2>
+<p>If you have a small set of differential equations, you should consider trying
+the differential equation solver contained within SciPy first, as it may be
+suitable for your task. However, if you have a large set of differential (and
+algebraic) equations and/or know that you need a more robust solver, then PyDAS
+may be just the tool for you.</p>
+<p>Read on to learn how to install and use PyDAS, and tips for getting the most
+out of PyDAS.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">1. Introduction</a><ul>
+<li><a class="reference internal" href="#why-pydas">1.1. Why PyDAS?</a></li>
+<li><a class="reference internal" href="#should-i-use-pydas">1.2. Should I Use PyDAS?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PyDAS Users&#8217; Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">2. Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/users/introduction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="2. Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PyDAS Users’ Guide"
+             >previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" >PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Joshua W. Allen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

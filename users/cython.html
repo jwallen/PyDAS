@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>4. Using Cython with PyDAS &mdash; PyDAS v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyDAS v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="PyDAS Users’ Guide" href="index.html" />
+    <link rel="next" title="PyDAS Developers’ Guide" href="../developers/index.html" />
+    <link rel="prev" title="3. Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="header">
+         <img src="../_static/pydas_logo.png" alt="PyDAS" />
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../developers/index.html" title="PyDAS Developers’ Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-cython-with-pydas">
+<h1>4. Using Cython with PyDAS<a class="headerlink" href="#using-cython-with-pydas" title="Permalink to this headline">¶</a></h1>
+<p>The reactions in series example from the previous section was useful as an
+introductory tool. However, the model was very simple, so much that using
+PyDAS is almost certainly overkill. In this section we will develop and solve
+a more complicated problem. The problem is complex enough that solving it
+using pure Python code is time consuming, so we will show how to accelerate
+the solve using Cython (which you already have installed if you are using
+PyDAS).</p>
+<div class="section" id="the-problem">
+<h2>4.1. The Problem<a class="headerlink" href="#the-problem" title="Permalink to this headline">¶</a></h2>
+<p>The problem of interest in this section is a classic problem from fluid
+dynamics/transport phenomena: diffusion through a one-dimensional thin
+membrane. The governing differential equation, called the <em>diffusion equation</em>,
+is (in dimensionless form)</p>
+<div class="math">
+<p><img src="../_images/math/987a2b801da498b83734ec347525b05523867484.png" alt="\frac{\partial \theta}{\partial t} = \frac{\partial^2 \theta}{\partial x^2}" /></p>
+</div><p>where <img class="math" src="../_images/math/20fc7774197177a30d987f12c8207e2ca9d9d480.png" alt="\theta(x,t)"/> is the &#8220;concentration&#8221; of the diffusing substance,
+<img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> is time, and <img class="math" src="../_images/math/26eeb5258ca5099acf8fe96b2a1049c48c89a5e6.png" alt="x"/> is position in the membrane. Since we are
+working in dimensionless units we will take the membrane width to be unity,
+giving us a domain of <img class="math" src="../_images/math/bc161c7c75c65122a9ce7a9e118169cd7f0f2055.png" alt="0 \le x \le 1"/>.</p>
+<p>The diffusion equation requires one initial condition and two boundary
+conditions. We will start with none of the substance in the membrane, so</p>
+<div class="math">
+<p><img src="../_images/math/2e53585e2eabee9fa63fa3d268d0e37c53ac0c21.png" alt="\theta(x, 0) = 0" /></p>
+</div><p>is the initial condition. We will fix the concentration at both boundaries
+using the boundary conditions</p>
+<div class="math">
+<p><img src="../_images/math/ab1b0153fa7bfc6be9348cd3939ea229ac4a1c34.png" alt="\theta(0, t) &amp;= 1 \\
+\theta(1, t) &amp;= 0" /></p>
+</div><p>For completeness we note that this problem has an analytical solution:</p>
+<div class="math">
+<p><img src="../_images/math/af2d9f5b1c1f8a424a30dedd55617c32eae0c6f2.png" alt="\theta(x,t) = 1 - x - 2 \sum_{n=1}^\infty \exp \left[ -(n \pi)^2 t \right] \frac{\sin n \pi x}{n \pi}" /></p>
+</div></div>
+<div class="section" id="solution-in-python">
+<h2>4.2. Solution in Python<a class="headerlink" href="#solution-in-python" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The code for this implementation can be found in the
+<tt class="docutils literal"><span class="pre">examples/diffusion/python</span></tt> directory. To run, use the command
+<tt class="docutils literal"><span class="pre">python</span> <span class="pre">examples/diffusion/python/diffusion.py</span></tt>.</p>
+</div>
+<p>In general we recommend that you begin by drafting your solution in pure
+Python. This lets you more quickly establish that your code is working as
+expected. If the resulting code is running fast enough for your purposes,
+then you haven&#8217;t wasted any time with unnecessary optimization. However, if
+the resulting code does run very slowly, it is not difficult or time consuming
+to convert it to Cython. We will utilize this paradigm for this example, which
+will also enable us to assess the sort of speed increase one might expect from
+Cythonization.</p>
+<p>As with the previous example, the first step is to rewrite the problem as a
+DAE system in general form. We can only have one independent variable in
+our DAE system; for this we will choose time because it only has one initial
+condition. For the spatial coordinate we discretize into a regular grid of
+<img class="math" src="../_images/math/fc97ef67268cd4e91bacdf12b8901d7036c9a056.png" alt="N"/> points, with constant spacing <img class="math" src="../_images/math/8f77e69e68d2b2148c3766c75394df37b9d7d908.png" alt="\Delta x = 1/(N-1)"/> between the
+grid points. Thus the function <img class="math" src="../_images/math/20fc7774197177a30d987f12c8207e2ca9d9d480.png" alt="\theta(x,t)"/> is replaced with a set of
+variables <img class="math" src="../_images/math/a54b0f705f761abf20cc368bb561820c618ee35e.png" alt="\theta_i(t)"/>, where the subscript indicates a unique grid
+point.</p>
+<p>We use the finite difference method to approximate the spatial second
+derivative at each grid point.</p>
+<div class="math">
+<p><img src="../_images/math/4d48e931de2046a3a74e6767310e6f986533472c.png" alt="\frac{\partial^2 \theta_i}{\partial x^2} \approx \frac{\theta_{i+1} - 2 \theta_i + \theta_{i-1}}{(\Delta x)^2}" /></p>
+</div><p>The result is a system of coupled ordinary differential equations</p>
+<div class="math">
+<p><img src="../_images/math/b2e3eeaed573726a51ceffdd75dcb81dbb91ae14.png" alt="\theta_1(t) &amp;= 1 \\
+\frac{d \theta_i}{d t} &amp;= \frac{\theta_{i+1} - 2 \theta_i + \theta_{i-1}}{(\Delta x)^2} \hspace{30pt} i = 2, 3, \ldots, N - 1 \\
+\theta_N(t) &amp;= 0" /></p>
+</div><p>with corresponding initial condition</p>
+<div class="math">
+<p><img src="../_images/math/fe432e2df3a964b7d6128d3d1d9f00ab3c62d886.png" alt="\theta_i(0) = 0 \hspace{30pt} i = 1, 2, \ldots, N" /></p>
+</div><p>(This approach is called the <em>method of lines</em>.)
+Finally we convert the above into general DAE form:</p>
+<div class="math">
+<p><img src="../_images/math/62c8ff66b390d150dea5f54912985a62dca469a2.png" alt="\theta_1(t) - 1 &amp;= 0 \\
+\frac{\theta_{i+1} - 2 \theta_i + \theta_{i-1}}{(\Delta x)^2} - \frac{d \theta_i}{d t} &amp;= 0 \hspace{30pt} i = 2, 3, \ldots, N - 1 \\
+\theta_N(t) &amp;= 0" /></p>
+</div><p>Now that we have the DAE system in general form, we can draft the code that
+solves it. We will again use DASSL to solve this problem. As before, we develop
+a class that derives from the <tt class="xref py py-class docutils literal"><span class="pre">DASSL</span></tt> class in the <tt class="xref py py-mod docutils literal"><span class="pre">pydas</span></tt> module,
+implementing a residual function based on the equations above. The complete
+class &#8211; only 25 lines! &#8211; is shown below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">pydas</span> <span class="kn">import</span> <span class="n">DASSL</span>
+
+<span class="k">class</span> <span class="nc">DiffusionModel</span><span class="p">(</span><span class="n">DASSL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for solving the diffusion equation in a 1D thin membrane. The</span>
+<span class="sd">    attribute `N` is the number of grid points to use to discretize the</span>
+<span class="sd">    spatial direction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
+
+    <span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dydt</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="c"># The grid point spacing</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c"># Internal nodes</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span> <span class="o">-</span> <span class="n">dydt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c"># Left boundary (x = 0)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span>
+        <span class="c"># Right boundary (x = 1)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">delta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">delta</span><span class="p">,</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>What remains is to write code that instantiates an object of the above class,
+initializes the model with the appropriate initial conditions, and generates
+the solution. This code is given below. Unlike the simple example from the
+previous section, here we use the <tt class="xref py py-meth docutils literal"><span class="pre">advance()</span></tt> method (instead of the
+<tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt> method) to get solution data only at a set of desired time points.
+The solver will take as many steps as necessary to reach the desired time,
+then interpolate if it oversteps that time.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">model</span> <span class="kn">import</span> <span class="n">DiffusionModel</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c"># The times at which to obtain the solution</span>
+    <span class="n">tlist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="c"># The number of grid points to use to discretize the spatial dimension</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">501</span>
+
+    <span class="c"># Set initial conditions</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c"># Initialize the model</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">DiffusionModel</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">dydt0</span> <span class="o">=</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">residual</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dydt0</span><span class="p">)</span>
+
+    <span class="c"># Integrate to get the solution at each time point</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t1</span> <span class="ow">in</span> <span class="n">tlist</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">advance</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="c"># You must make a copy of y because it is overwritten by DASSL at</span>
+        <span class="c"># each call to advance()</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+    <span class="c"># Convert the solution vectors to numpy arrays</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that we are once again able to provide consistent initial values for the
+derivatives <img class="math" src="../_images/math/7b1fead457ac50c5c2d63aea27d73f25d37c3ff5.png" alt="d\vector{y}/dt"/> using the residual function.</p>
+<p>Running the above code and plotting the results gives the following series of
+concentration profiles that are consistent with the analytical solution:</p>
+<div class="figure">
+<img alt="../_images/diffusionPlot.png" src="../_images/diffusionPlot.png" style="height: 3in;" />
+</div>
+</div>
+<div class="section" id="solution-in-cython">
+<h2>4.3. Solution in Cython<a class="headerlink" href="#solution-in-cython" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The code for this implementation can be found in the
+<tt class="docutils literal"><span class="pre">examples/diffusion/cython</span></tt> directory. To run, use the command
+<tt class="docutils literal"><span class="pre">python</span> <span class="pre">examples/diffusion/cython/diffusion.py</span></tt>.</p>
+</div>
+<p>Running the Python implementation takes some time. Profiling reveals that our
+<tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method clocks in at 110 s on this particular computer. This
+may or may not be considered &#8220;slow&#8221; depending on your target application, but
+let&#8217;s see how fast we can make it by switching to Cython.</p>
+<p><a class="reference external" href="http://www.cython.org/">Cython</a> is a language very similar to Python, but
+with added syntax to enable compilation to efficient C code. In particular,
+much of the speed boost comes from simply declaring the type of the variables
+being used. For numpy arrays, this enables fast array access using pointer
+arithmetic. Since we have a lot of array lookups in our residual function, we
+anticipate the potential for a significant speed boost. But first we have to
+code it.</p>
+<p>Fortunately, our Python code serves as an excellent starting point.
+(It is a stated goal of the Cython project that they be able to compile as much
+unmodified Python code as possible, and as of Cython 0.14 they are doing a
+pretty good job of this.) From our
+profiling analysis we know that the <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method is by far the
+bottleneck of the code. It&#8217;s not so much that the function is slow (though it
+is), but that it is called more than 35000 times by DASSL. Thus we only need to
+Cythonize the <tt class="xref py py-class docutils literal"><span class="pre">DiffusionModel</span></tt> class.</p>
+<p>We will abstain from a detailed discussion of the Cython syntax here, and
+instead refer you to the generally excellent
+<a class="reference external" href="http://docs.cython.org/">Cython documentation</a> for this. Put briefly, we
+must do the following:</p>
+<ul class="simple">
+<li>Rename the file to have the <tt class="docutils literal"><span class="pre">.pyx</span></tt> suffix (instead of <tt class="docutils literal"><span class="pre">.py</span></tt>) used by
+Cython.</li>
+<li>Add <tt class="docutils literal"><span class="pre">cimport</span></tt> statements to access the Cython declarations for numpy
+and PyDAS.</li>
+<li>Mark the <tt class="xref py py-class docutils literal"><span class="pre">DiffusionModel</span></tt> class as a Cython extension type by
+prepending the <tt class="docutils literal"><span class="pre">cdef</span></tt> keyword.</li>
+<li>Declare the type of each attribute of the <tt class="xref py py-class docutils literal"><span class="pre">DiffusionModel</span></tt> class.</li>
+<li>Declare the type of each parameter of the <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method.</li>
+<li>Declare the type of each local variable of the <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method.</li>
+<li>Create a <tt class="docutils literal"><span class="pre">setup.py</span></tt> file to use to compile the <tt class="docutils literal"><span class="pre">.pyx</span></tt> file to
+machine code. The compiled file has the suffix <tt class="docutils literal"><span class="pre">.pyd</span></tt> on Windows and
+<tt class="docutils literal"><span class="pre">.so</span></tt> on non-Windows systems, and acts as a valid Python module
+(i.e. can be imported as usual).</li>
+</ul>
+<p>The new DiffusionModel class is only slightly longer than before:</p>
+<div class="highlight-python"><pre>import numpy
+cimport numpy
+
+from pydas cimport DASSL
+
+cdef class DiffusionModel(DASSL):
+    """
+    An extension type for solving the diffusion equation in a 1D thin membrane.
+    The attribute `N` is the number of grid points to use to discretize the
+    spatial direction.
+    """
+
+    cdef public int N
+
+    def __init__(self, N=10):
+        self.N = N
+
+    def residual(self, double t, numpy.ndarray[numpy.float64_t, ndim=1] y, numpy.ndarray[numpy.float64_t, ndim=1] dydt):
+
+        cdef Py_ssize_t i
+        cdef double dx
+        cdef numpy.ndarray[numpy.float64_t, ndim=1] delta
+
+        dx = 1.0 / (self.N - 1)
+
+        delta = numpy.zeros(y.shape[0], numpy.float64)
+        # Internal nodes
+        for i in range(1, self.N-1):
+            delta[i] = (y[i+1] - 2 * y[i] + y[i-1]) / (dx * dx) - dydt[i]
+        # Left boundary (x = 0)
+        i = 0
+        delta[i] = y[i] - 1.0
+        # Right boundary (x = 1)
+        i = self.N - 1
+        delta[i] = y[i]
+
+        return delta, 0</pre>
+</div>
+<p>The block of code used to initialize and solve is completely unchanged from
+before.</p>
+<p>Lastly, we need a way to compile the <tt class="docutils literal"><span class="pre">.pyx</span></tt> file above. One way is to use
+Python&#8217;s distutils functionality. Below is a valid <tt class="docutils literal"><span class="pre">setup.py</span></tt> file for this
+purpose:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
+    <span class="kn">from</span> <span class="nn">distutils.extension</span> <span class="kn">import</span> <span class="n">Extension</span>
+    <span class="kn">from</span> <span class="nn">Cython.Distutils</span> <span class="kn">import</span> <span class="n">build_ext</span>
+
+    <span class="c"># The Cython modules to setup</span>
+    <span class="n">ext_modules</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Extension</span><span class="p">(</span><span class="s">&#39;model&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;model.pyx&#39;</span><span class="p">],</span> <span class="n">include_dirs</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">get_include</span><span class="p">()]),</span>
+    <span class="p">]</span>
+
+    <span class="c"># Run the setup command</span>
+    <span class="n">setup</span><span class="p">(</span>
+        <span class="n">cmdclass</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;build_ext&#39;</span><span class="p">:</span> <span class="n">build_ext</span><span class="p">},</span>
+        <span class="n">ext_modules</span> <span class="o">=</span> <span class="n">ext_modules</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>To execute the above, issue a command like</p>
+<div class="highlight-python"><pre>$ python setup.py build_ext --inplace</pre>
+</div>
+<p>from the directory containing all of the relevant files.</p>
+<p>Running the Cythonized version of the model is much faster, and gives completely
+identical output as the pure Python implementation. Profiling analysis
+results in a time of 0.71 s for the <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method, a speed increase
+of over 150x! Of course, the amount of speed boost you get depends heavily on
+how your residual function is constructed, but gains of an order of magnitude
+or more are fairly common.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">4. Using Cython with PyDAS</a><ul>
+<li><a class="reference internal" href="#the-problem">4.1. The Problem</a></li>
+<li><a class="reference internal" href="#solution-in-python">4.2. Solution in Python</a></li>
+<li><a class="reference internal" href="#solution-in-cython">4.3. Solution in Cython</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">3. Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../developers/index.html"
+                        title="next chapter">PyDAS Developers&#8217; Guide</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/users/cython.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../developers/index.html" title="PyDAS Developers’ Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial"
+             >previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" >PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Joshua W. Allen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

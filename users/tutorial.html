@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. Tutorial &mdash; PyDAS v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyDAS v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="PyDAS Users’ Guide" href="index.html" />
+    <link rel="next" title="4. Using Cython with PyDAS" href="cython.html" />
+    <link rel="prev" title="2. Installation" href="installation.html" /> 
+  </head>
+  <body>
+    <div class="header">
+         <img src="../_static/pydas_logo.png" alt="PyDAS" />
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cython.html" title="4. Using Cython with PyDAS"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="2. Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" accesskey="U">PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial">
+<h1>3. Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>In this section we will develop code to solve a very simple DAE system using
+DASSL.</p>
+<p>The physical process we are modeling is a pair of first-order chemical
+reactions in series occurring in an ideal batch reactor:</p>
+<div class="math">
+<p><img src="../_images/math/d64fa6e5f902f875dbc46db95e41fa5aa370ce73.png" alt="\ce{A -&gt;[k_1] B -&gt;[k_2] C}" /></p>
+</div><p>The governing equations for this process are the system of first-order
+ordinary differential equations</p>
+<div class="math">
+<p><img src="../_images/math/d9400866e0af5f455d1d8ccf592cba11e221ddf7.png" alt="\frac{dA}{dt} &amp;= -k_1 A \\
+\frac{dB}{dt} &amp;= k_1 A - k_2 B \\
+\frac{dC}{dt} &amp;= k_2 B" /></p>
+</div><p>where <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> is time, <img class="math" src="../_images/math/019e9892786e493964e145e7c5cf7b700314e53b.png" alt="A"/>, <img class="math" src="../_images/math/ff5fb3d775862e2123b007eb4373ff6cc1a34d4e.png" alt="B"/>, and <img class="math" src="../_images/math/c3355896da590fc491a10150a50416687626d7cc.png" alt="C"/> represent the
+concentration of each species, and <img class="math" src="../_images/math/7f2f57887b2e2f63a617b6a4b7a7d466c26c4342.png" alt="k_1"/> and <img class="math" src="../_images/math/cb72004e1c6c7b0782bbf2c7e40dcaad72993c4f.png" alt="k_2"/> are rate
+coefficients for each chemical reaction. The initial condition is pure A, i.e.</p>
+<div class="math">
+<p><img src="../_images/math/94cae40b7ec9ef44f77f419e81897042b250df76.png" alt="A(0) = 1 \hspace{30pt} B(0) = 0 \hspace{30pt} C(0) = 0" /></p>
+</div><p>For the purposes of this example we are not interested in units.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Rewrite your DAE system in general form.</strong> The general form of a DAE
+system is <img class="math" src="../_images/math/a4e4d2ba6b91e1ddc300f3860f984d39514e7d7d.png" alt="\vector{g}( t, \vector{y}, d\vector{y}/dt) = \vector{0}"/>.
+Since our governing equations are explicit first-order ODEs, this is very easy:</p>
+<div class="math">
+<p><img src="../_images/math/73aaada04d23f37860d84e574f9c8eee1a0092b4.png" alt="-k_1 A - \frac{dA}{dt} &amp;= 0 \\
+k_1 A - k_2 B - \frac{dB}{dt} &amp;= 0 \\
+k_2 B - \frac{dC}{dt} &amp;= 0" /></p>
+</div><p>Most DAE systems should be expressible in general form, though some
+manual transformations may be required.</p>
+</li>
+<li><p class="first"><strong>Import the solver class from the</strong> <tt class="xref py py-mod docutils literal"><span class="pre">pydas</span></tt> <strong>module.</strong> This is done with
+a single import statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pydas</span> <span class="kn">import</span> <span class="n">DASSL</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>Create a new class that derives from the chosen solver class.</strong> The use of
+a class for this purpose enables you to store variables needed by the
+residual and/or Jacobian functions as attributes of the class. In this
+example we will need to store the rate coefficients <img class="math" src="../_images/math/7f2f57887b2e2f63a617b6a4b7a7d466c26c4342.png" alt="k_1"/> and
+<img class="math" src="../_images/math/cb72004e1c6c7b0782bbf2c7e40dcaad72993c4f.png" alt="k_2"/>. Here we provide an <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> method to easily set these
+values. A docstring describing the purpose of the class is always a good
+idea.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">DASSL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A model of first-order irreversible reactions in series</span>
+
+<span class="sd">        A -&gt; B -&gt; C</span>
+
+<span class="sd">    occurring in a batch reactor. In such a system the concentration</span>
+<span class="sd">    of the intermediate B has a maximum that depends on the relative</span>
+<span class="sd">    rate constants `k1` and `k2`. These are stored as data members of</span>
+<span class="sd">    the class so that they are available to the residual function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k1</span> <span class="o">=</span> <span class="n">k1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k2</span> <span class="o">=</span> <span class="n">k2</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>Write the residual method for that class.</strong> The <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method is
+automatically called by the solver, and is used to compute the value of.</p>
+<div class="math">
+<p><img src="../_images/math/67b6a436d4443df03cf590758927073b20c94509.png" alt="\vector{g} \left( t, \vector{y}, \frac{d\vector{y}}{dt} \right) = \vector{0}" /></p>
+</div><p>The method provides three parameters in
+addition to the <tt class="docutils literal"><span class="pre">self</span></tt> object: the independent variable <cite>t</cite>, a float; the
+vector of dependent variables <cite>y</cite>, a numpy array of floats; and the first
+derivatives <cite>dydt</cite>, a numpy array of floats. The method expects two return
+variables: a numpy array of floats containing the value of
+<img class="math" src="../_images/math/59e957d637b170ad4859da872131c80bbed2bb03.png" alt="\vector{g}( t, \vector{y}, d\vector{y}/dt)"/> corresponding to the
+input parameters, and a integer status flag, having a value of 0 if okay or
+-2 to terminate the simulation. Our <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method reflects the
+general form of the DAE system:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dydt</span><span class="p">):</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">delta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">k1</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dydt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">delta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">k1</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">k2</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dydt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">delta</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">k2</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dydt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">delta</span><span class="p">,</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>Note that you need an <tt class="docutils literal"><span class="pre">import</span> <span class="pre">numpy</span></tt> statement in your module for the
+above to run.</p>
+</li>
+<li><p class="first"><strong>(Optional) Write the jacobian method for that class.</strong> The
+<tt class="xref py py-meth docutils literal"><span class="pre">jacobian()</span></tt> method is used to specify the analytical Jacobian
+corresponding to the residual function. The Jacobian is the matrix of
+partial derivatives with elements given by</p>
+<div class="math">
+<p><img src="../_images/math/1ae50777d1dd0407c391ef2024e67c71b383a460.png" alt="J_{mn} = \frac{\partial g_m}{\partial y_n} + C_J \frac{\partial g_m}{\partial (dy_n/dt)}" /></p>
+</div><p>In addition to the same <cite>t</cite>,
+<cite>y</cite>, and <cite>dydt</cite> parameters as the <tt class="xref py py-meth docutils literal"><span class="pre">residual()</span></tt> method, the
+<tt class="xref py py-meth docutils literal"><span class="pre">jacobian()</span></tt> method also has a fourth parameter: a float <cite>cj</cite> to be used
+to scale the derivative components in the Jacobian matrix. For our system
+the Jacobian is not too difficult to generate:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dydt</span><span class="p">,</span> <span class="n">cj</span><span class="p">):</span>
+    <span class="n">pd</span> <span class="o">=</span> <span class="o">-</span><span class="n">cj</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">pd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">k1</span>
+    <span class="n">pd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k1</span>
+    <span class="n">pd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">k2</span>
+    <span class="n">pd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k2</span>
+    <span class="k">return</span> <span class="n">pd</span>
+</pre></div>
+</div>
+<p>If not specified, the solver will evaluate an approximate Jacobian
+numerically. For many problems this is enough, which is good because it
+can be time-consuming to generate an analytical Jacobian. The use of
+analytical or numerical Jacobian is detected and configured automatically
+by PyDAS; all you need to do is to provide or omit the <tt class="xref py py-meth docutils literal"><span class="pre">jacobian()</span></tt>
+method.</p>
+</li>
+<li><p class="first"><strong>Create an object of your derived class.</strong> Since we designed our
+<tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> method to accept the rate coefficients, we can easily
+set them to the values we want. For this tutorial we will use
+<img class="math" src="../_images/math/dbb076c61f6e816996841a5f31babd87ac8d0650.png" alt="k_1 = 1.0"/> and <img class="math" src="../_images/math/2a4ba73a37a84449de6714538aadfc0569d8fe46.png" alt="k_2 = 0.25"/>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">k2</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>Initialize the model with the initial conditions and solver options.</strong>
+The initial conditions follow directly from the equation above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since we are using a DAE solver, we also need initial values for the
+first derivatives <img class="math" src="../_images/math/7b1fead457ac50c5c2d63aea27d73f25d37c3ff5.png" alt="d\vector{y}/dt"/>. These initial values must be
+<em>consistent</em> with those of <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> and <img class="math" src="../_images/math/54514d3a40b9ad5be29d3f8fdd2a50b95eea1213.png" alt="\vector{y}"/>. It is best if
+you can determine the initial values of <img class="math" src="../_images/math/7b1fead457ac50c5c2d63aea27d73f25d37c3ff5.png" alt="d\vector{y}/dt"/> manually,
+as we can in this example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dydt0</span> <span class="o">=</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">residual</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">model</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dydt0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you cannot do this manually (or simply have no idea how), you can simply
+omit it; DASSL will then try to estimate it for you. Note that this is not
+always successful.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use the <tt class="xref py py-meth docutils literal"><span class="pre">initialize()</span></tt> method to specify absolute and
+relative tolerances for the solver to use, either as scalars or numpy arrays.
+Below we use scalars:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dydt0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Default values will be used if not specified.</p>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">initialize()</span></tt> method of the solver class must always be called
+before attempting to integrate.</p>
+</li>
+<li><p class="first"><strong>Integrate forward using advance or step.</strong> After initialization, the
+current values of <img class="math" src="../_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/> and <img class="math" src="../_images/math/c1db11d63d2d9f9bb1d70b3e33067500aaa1f6a1.png" alt="\vector{y}(t)"/> are available from
+the <cite>t</cite> and <cite>y</cite> attributes of the solver object. In order to conduct the
+integration, call the <tt class="xref py py-meth docutils literal"><span class="pre">advance()</span></tt> or <tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt> methods of the solver
+object. The <tt class="xref py py-meth docutils literal"><span class="pre">advance()</span></tt> method integrates forward until the time
+specified as the parameter is reached; the <cite>t</cite> and <cite>y</cite> attributes then will
+contain the solution at that time. The <tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt> method integrates such
+that one automatically-determined step is taken towards the specified
+parameter, which is usually the end time of the simulation; when finished,
+the <cite>t</cite> and <cite>y</cite> attributes will contain the solution at the end time of that
+step. Here we will use the <tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Initialize solution vectors</span>
+<span class="n">t</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c"># Set maximum simulation time and maximum number of simulation steps to allow</span>
+<span class="n">tmax</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">maxiter</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="c"># Generate the solution by stepping until tmax is reached</span>
+<span class="c"># This will give you the solution at time points automatically selected</span>
+<span class="c"># by the solver</span>
+<span class="nb">iter</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="n">maxiter</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">tmax</span><span class="p">:</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">tmax</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+    <span class="c"># You must make a copy of y because it is overwritten by DASSL at</span>
+    <span class="c"># each call to step()</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+<span class="c"># Convert the solution vectors to numpy arrays</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that we must keep track of the solution ourselves, as each call to
+<tt class="xref py py-meth docutils literal"><span class="pre">advance()</span></tt> or <tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt> causes the the <cite>t</cite> and <cite>y</cite> attributes to be
+overwritten. (In particular, we must copy <cite>y</cite> because it is a numpy array.)
+We must also provide the test that the end time of the simulation is reached,
+as this is not done for you. Finally, we convert the solution data to numpy
+arrays for easier postprocessing.</p>
+</li>
+</ol>
+<p>The complete code for this tutorial can be found in the <tt class="docutils literal"><span class="pre">rxnSeries</span></tt> DASSL
+example. Running this code should produce the following plot (assuming you have
+matplotlib installed):</p>
+<div class="figure">
+<img alt="../_images/rxnSeriesPlot.png" src="../_images/rxnSeriesPlot.png" style="height: 3in;" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">2. Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cython.html"
+                        title="next chapter">4. Using Cython with PyDAS</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/users/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cython.html" title="4. Using Cython with PyDAS"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="2. Installation"
+             >previous</a> |</li>
+        <li><a href="../index.html">Home</a> |&nbsp;</li>
+        <li><a href="../contents.html">Documentation</a> &raquo;</li>
+
+          <li><a href="index.html" >PyDAS Users&#8217; Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Joshua W. Allen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>
