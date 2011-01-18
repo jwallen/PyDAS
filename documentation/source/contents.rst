@@ -5,8 +5,8 @@ PyDAS v\ |release| documentation
 .. toctree::
     :maxdepth: 2
     
-    tutorial
-    reference
+    users/index
+    developers/index
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% set title = 'Overview' %}
+{% block body %}
+
+  <p style="margin-top: 0px; padding-top: 12px">
+    <b>PyDAS</b> is a free <a href="http://www.python.org/" target="_blank">Python</a> 
+    wrapper to the DASSL differential algebraic equation solver. 
+  </p>
+  
+  <h2>Features</h2>
+  
+  <h2>Get PyDAS</h2>
+  
+  <h2>Documentation</h2>
+  <table class="contentstable" align="center" style="margin-left: 30px"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("users/index") }}">Users' Guide</a><br/>
+         <span class="linkdescr">how to use PyDAS</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("developers/index") }}">Developers' Guide</a><br/>
+         <span class="linkdescr">how to develop in PyDAS</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents</a><br/>
+         <span class="linkdescr">for a complete overview</span></p>
+   </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("search") }}">Search page</a><br/>
+         <span class="linkdescr">search the documentation</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("genindex") }}">General Index</a><br/>
+         <span class="linkdescr">all functions, classes, terms</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("modindex") }}">Module Index</a><br/>
+         <span class="linkdescr">all documented modules</span></p>
+    </td></tr>
+  </table>
+  
+{% endblock %}

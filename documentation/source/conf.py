@@ -34,7 +34,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
 
 # General information about the project.
 project = u'PyDAS'
@@ -131,11 +131,12 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_index = 'index.html'
+html_sidebars = {'index': 'indexsidebar.html'}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+html_additional_pages = {'index': 'index.html'}
 
 # If false, no module index is generated.
 #html_use_modindex = True
@@ -172,8 +173,8 @@ htmlhelp_basename = 'PyDASdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PyDAS.tex', u'PyDAS Documentation',
-   u'Joshua W. Allen', 'manual'),
+  ('developers/index', 'developers.tex', u"PyDAS Developers' Guide", u'Joshua W. Allen', 'manual'),
+  ('users/index', 'users.tex', u"PyDAS Users' Guide", u'Joshua W. Allen', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -185,7 +186,13 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = """
+\usepackage[version=3]{mhchem}
+
+\\renewcommand{\\vector}[1]{\\ensuremath{\\boldsymbol{\\mathbf{#1}}}}
+\\renewcommand{\\matrix}[1]{\\ensuremath{\\boldsymbol{\\mathbf{#1}}}}
+"""
+pngmath_latex_preamble = latex_preamble
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
