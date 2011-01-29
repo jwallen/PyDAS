@@ -279,6 +279,7 @@ cdef class DASSL:
         self.ipar = np.zeros(1, np.int32)
         
         # Set initial conditions
+        self.t = t0
         self.y = np.zeros(neq, np.float64)
         for i in range(neq):
             self.y[i] = y0[i]
