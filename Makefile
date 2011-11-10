@@ -6,6 +6,8 @@
 
 -include make.inc
 
+.PHONY: DASSL DASPK DASKR cython clean
+
 all: DASSL DASPK DASKR cython
 
 cython:
