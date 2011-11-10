@@ -21,4 +21,4 @@ $(DLIB): $(DOBJ)
 	$(F77) $(CFLAGS) -c $< -o $@
 	
 clean:
-	rm $(DLIB) $(DOBJ)
+	rm -f $(DLIB) $(DOBJ)

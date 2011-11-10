@@ -28,4 +28,4 @@ $(SLIB): $(SOBJ)
 	$(F77) $(CFLAGS) -c $< -o $@
 	
 clean:
-	rm $(DLIB) $(DOBJ) $(SLIB) $(SOBJ)
+	rm -f $(DLIB) $(DOBJ) $(SLIB) $(SOBJ)
