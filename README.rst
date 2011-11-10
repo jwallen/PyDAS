@@ -99,8 +99,25 @@ Python package directory. If you wish to formall install PyDAS, run the
 following command from the base package directory after the ``make`` command
 (you may need root privileges for this)::
 
-    # python setup.py install
+    $ python setup.py install
 
 You may wish to write a file `make.inc` that sets certain variables used by
 the Makefiles (e.g. the Fortran compiler). An example of such a file, 
 `make.inc.example`, has been provided.
+
+
+Mac OS X Lion
+-------------
+
+Homebrew (http://mxcl.github.com/homebrew/) is an easy way to get gfortran::
+
+    $ brew install gfortran
+
+But your system may still not be able to find the correct `libgfortran.a` library file 
+(see https://github.com/mxcl/homebrew/issues/8539 ). This should make it work::
+
+    $ LIBRARY_PATH=/usr/local/lib/gcc/i686-apple-darwin11/4.2.1/x86_64/ make F77=gfortran
+
+Then, to get it installed into your proper python place::
+
+    $ make install

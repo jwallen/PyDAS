@@ -6,6 +6,8 @@
 
 -include make.inc
 
+.PHONY: DASSL DASPK DASKR cython clean
+
 all: DASSL DASPK DASKR cython
 
 cython:
@@ -36,7 +38,7 @@ clean-DASKR:
 
 clean-cython:
 	python setup.py clean $(CLEAN_FLAGS)
-	rm -f *.so *.pyc
+	rm -f *.so *.pyc *.c
 
 help:
 	@echo ""
