@@ -1,0 +1,1682 @@
+python module daskr__user__routines 
+    interface
+        subroutine rt(neq,e_rwork_lt0_er,y,yp,nrt,r0,rpar,ipar) ! in daskr/solver/ddaskr.f:drchek:unknown_interface
+            integer :: neq
+            double precision :: e_rwork_lt0_er
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yp
+            integer :: nrt
+            double precision dimension(*) :: r0
+            double precision :: rpar
+            integer :: ipar
+        end subroutine rt
+        subroutine nlsic(x,y,yprime,neq,icopt,id,res,jac,psol,h,tscale,wt,jskip,rpar,ipar,savr,delta,e,yic,ypic,pwk,wm,iwm,cj,uround,epli,sqrtn,rsqrtn,epconi,ratemx,stptol,jflg,icnflg,icnstr,iernls) ! in daskr/solver/ddaskr.f:ddasic:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            external jac
+            external psol
+            double precision :: h
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            integer :: jskip
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision dimension(*) :: pwk
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epconi
+            double precision, optional :: ratemx=0.8d0
+            double precision :: stptol
+            integer :: jflg
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            integer :: iernls
+        end subroutine nlsic
+        subroutine nls(x,y,yprime,neq,res,jac,psol,h,wt,jstart,idid,rpar,ipar,phi,gamma,savr,delta,e,wm,iwm,cj,cjold,cjlast,s,uround,epli,sqrtn,rsqrtn,epcon,jcalc,jflg,kp1,nonneg,ntype,iernls) ! in daskr/solver/ddaskr.f:ddstp:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jac
+            external psol
+            double precision :: h
+            double precision dimension(*) :: wt
+            integer :: jstart
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: gamma
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: cjold
+            double precision :: cjlast
+            double precision :: s
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epcon
+            integer :: jcalc
+            integer :: jflg
+            integer :: kp1
+            integer :: nonneg
+            integer :: ntype
+            integer :: iernls
+        end subroutine nls
+        subroutine res(x,y,yprime,cj,delta,ires,rpar,ipar) ! in daskr/solver/ddaskr.f:ddasid:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision :: cj
+            double precision dimension(*) :: delta
+            integer :: ires
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine res
+        subroutine jac(x,y,yprime,wm,cj,rpar,ipar) ! in daskr/solver/ddaskr.f:dmatd:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: wm
+            double precision :: cj
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine jac
+        subroutine jack(res,ires,neq,x,y,yprime,wt,delta,r,h,cj,e_wm_lwp_er,e_iwm_liwp_er,ierpj,rpar,ipar) ! in daskr/solver/ddaskr.f:ddasik:unknown_interface
+            external res
+            integer :: ires
+            integer :: neq
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: r
+            double precision :: h
+            double precision :: cj
+            double precision :: e_wm_lwp_er
+            integer :: e_iwm_liwp_er
+            integer :: ierpj
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine jack
+        subroutine psol(neq,t,y,yprime,savr,pwk,cj,wt,wp,iwp,r,eplin,ier,rpar,ipar) ! in daskr/solver/ddaskr.f:dfnrmk:unknown_interface
+            integer :: neq
+            double precision :: t
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: pwk
+            double precision :: cj
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision dimension(*) :: r
+            double precision :: eplin
+            integer :: ier
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine psol
+        subroutine rblock(t,jx,jy,e_u_j0_1_er,r1) ! in daskr/preconds/drbdpre.f:drbdja:unknown_interface
+            double precision :: t
+            integer :: jx
+            integer :: jy
+            double precision :: e_u_j0_1_er
+            double precision dimension(*) :: r1
+        end subroutine rblock
+    end interface
+end python module daskr__user__routines
+
+python module _daskr
+    interface
+        function d1mach(idummy) ! in daskr/solver/daux.f
+            integer :: idummy
+            double precision :: d1mach
+        end function d1mach
+        subroutine dumsum(a,b,c) ! in daskr/solver/daux.f
+            double precision :: a
+            double precision :: b
+            double precision :: c
+        end subroutine dumsum
+        subroutine xerrwd(msg,nmes,nerr,level,ni,i1,i2,nr,r1,r2) ! in daskr/solver/daux.f
+            character*(*) :: msg
+            integer :: nmes
+            integer :: nerr
+            integer :: level
+            integer :: ni
+            integer :: i1
+            integer :: i2
+            integer :: nr
+            double precision :: r1
+            double precision :: r2
+        end subroutine xerrwd
+        subroutine xsetf(mflag) ! in daskr/solver/daux.f
+            integer :: mflag
+        end subroutine xsetf
+        subroutine xsetun(lun) ! in daskr/solver/daux.f
+            integer :: lun
+        end subroutine xsetun
+        function ixsav(ipar,ivalue,iset) ! in daskr/solver/daux.f
+            integer :: ipar
+            integer :: ivalue
+            logical :: iset
+            integer :: ixsav
+        end function ixsav
+        subroutine ddaskr(res,neq,t,y,yprime,tout,info,rtol,atol,idid,rwork,lrw,iwork,liw,rpar,ipar,jac,psol,rt,nrt,jroot) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            external res
+            integer :: neq
+            double precision :: t
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision :: tout
+            integer dimension(20) :: info
+            double precision dimension(*) :: rtol
+            double precision dimension(*) :: atol
+            integer :: idid
+            double precision dimension(lrw) :: rwork
+            integer, optional,check(len(rwork)>=lrw),depend(rwork) :: lrw=len(rwork)
+            integer dimension(liw) :: iwork
+            integer, optional,check(len(iwork)>=liw),depend(iwork) :: liw=len(iwork)
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            external jac
+            external psol
+            external rt
+            integer :: nrt
+            integer :: jroot
+        end subroutine ddaskr
+        subroutine drchek(job,rt,nrt,neq,tn,tout,y,yp,phi,psi,kold,r0,r1,rx,jroot,irt,uround,info3,rwork,iwork,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: job
+            external rt
+            integer :: nrt
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            double precision :: tn
+            double precision :: tout
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yp
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: psi
+            integer :: kold
+            double precision dimension(*) :: r0
+            double precision dimension(*) :: r1
+            double precision dimension(*) :: rx
+            integer dimension(*) :: jroot
+            integer :: irt
+            double precision :: uround
+            integer :: info3
+            double precision dimension(*) :: rwork
+            integer dimension(*) :: iwork
+            double precision :: rpar
+            integer :: ipar
+        end subroutine drchek
+        subroutine droots(nrt,hmin,jflag,x0,x1,r0,r1,rx,x,jroot) ! in daskr/solver/ddaskr.f
+            integer, optional,check(len(r0)>=nrt),depend(r0) :: nrt=len(r0)
+            double precision :: hmin
+            integer :: jflag
+            double precision :: x0
+            double precision :: x1
+            double precision dimension(nrt) :: r0
+            double precision dimension(nrt),depend(nrt) :: r1
+            double precision dimension(nrt),depend(nrt) :: rx
+            double precision :: x
+            integer dimension(nrt),depend(nrt) :: jroot
+        end subroutine droots
+        subroutine ddasic(x,y,yprime,neq,icopt,id,res,jac,psol,h,tscale,wt,nic,idid,rpar,ipar,phi,savr,delta,e,yic,ypic,pwk,wm,iwm,uround,epli,sqrtn,rsqrtn,epconi,stptol,jflg,icnflg,icnstr,nlsic) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            external jac
+            external psol
+            double precision :: h
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            integer :: nic
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision dimension(*) :: pwk
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epconi
+            double precision :: stptol
+            integer :: jflg
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            external nlsic
+        end subroutine ddasic
+        subroutine dyypnw(neq,y,yprime,cj,rl,p,icopt,id,ynew,ypnew) ! in daskr/solver/ddaskr.f
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision :: cj
+            double precision :: rl
+            double precision dimension(*) :: p
+            integer :: icopt
+            integer dimension(*) :: id
+            double precision dimension(*) :: ynew
+            double precision dimension(*) :: ypnew
+        end subroutine dyypnw
+        subroutine ddstp(x,y,yprime,neq,res,jac,psol,h,wt,vt,jstart,idid,rpar,ipar,phi,savr,delta,e,wm,iwm,alpha,beta,gamma,psi,sigma,cj,cjold,hold,s,hmin,uround,epli,sqrtn,rsqrtn,epcon,iphase,jcalc,jflg,k,kold,ns,nonneg,ntype,nls) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jac
+            external psol
+            double precision :: h
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: vt
+            integer :: jstart
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision dimension(*) :: alpha
+            double precision dimension(*) :: beta
+            double precision dimension(*) :: gamma
+            double precision dimension(*) :: psi
+            double precision dimension(*) :: sigma
+            double precision :: cj
+            double precision :: cjold
+            double precision :: hold
+            double precision :: s
+            double precision :: hmin
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epcon
+            integer :: iphase
+            integer :: jcalc
+            integer :: jflg
+            integer :: k
+            integer :: kold
+            integer :: ns
+            integer :: nonneg
+            integer :: ntype
+            external nls
+        end subroutine ddstp
+        subroutine dcnstr(neq,y,ynew,icnstr,tau,rlx,iret,ivar) ! in daskr/solver/ddaskr.f
+            integer, optional,check(len(y)>=neq),depend(y) :: neq=len(y)
+            double precision dimension(neq) :: y
+            double precision dimension(neq),depend(neq) :: ynew
+            integer dimension(neq),depend(neq) :: icnstr
+            double precision :: tau
+            double precision :: rlx
+            integer :: iret
+            integer :: ivar
+        end subroutine dcnstr
+        subroutine dcnst0(neq,y,icnstr,iret) ! in daskr/solver/ddaskr.f
+            integer, optional,check(len(y)>=neq),depend(y) :: neq=len(y)
+            double precision dimension(neq) :: y
+            integer dimension(neq),depend(neq) :: icnstr
+            integer :: iret
+        end subroutine dcnst0
+        subroutine ddawts(neq,iwt,rtol,atol,y,wt,rpar,ipar) ! in daskr/solver/ddaskr.f
+            integer :: neq
+            integer :: iwt
+            double precision dimension(*) :: rtol
+            double precision dimension(*) :: atol
+            double precision dimension(*) :: y
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine ddawts
+        subroutine dinvwt(neq,wt,ier) ! in daskr/solver/ddaskr.f
+            integer :: neq
+            double precision dimension(*) :: wt
+            integer :: ier
+        end subroutine dinvwt
+        subroutine ddatrp(x,xout,yout,ypout,neq,kold,phi,psi) ! in daskr/solver/ddaskr.f
+            double precision :: x
+            double precision :: xout
+            double precision dimension(*) :: yout
+            double precision dimension(*) :: ypout
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            integer :: kold
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: psi
+        end subroutine ddatrp
+        function ddwnrm(neq,v,rwt,rpar,ipar) ! in daskr/solver/ddaskr.f
+            integer :: neq
+            double precision dimension(*) :: v
+            double precision dimension(*) :: rwt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision :: ddwnrm
+        end function ddwnrm
+        subroutine ddasid(x,y,yprime,neq,icopt,id,res,jac,pdum,h,tscale,wt,jsdum,rpar,ipar,dumsvr,delta,r,yic,ypic,dumpwk,wm,iwm,cj,uround,dume,dums,dumr,epcon,ratemx,stptol,jfdum,icnflg,icnstr,iernls) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            external jac
+            double precision :: pdum
+            double precision :: h
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            integer :: jsdum
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision :: dumsvr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: r
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision :: dumpwk
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: uround
+            double precision :: dume
+            double precision :: dums
+            double precision :: dumr
+            double precision :: epcon
+            double precision :: ratemx
+            double precision :: stptol
+            integer :: jfdum
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            integer :: iernls
+        end subroutine ddasid
+        subroutine dnsid(x,y,yprime,neq,icopt,id,res,wt,rpar,ipar,delta,r,yic,ypic,wm,iwm,cj,tscale,epcon,ratemx,maxit,stptol,icnflg,icnstr,iernew) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: r
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: tscale
+            double precision :: epcon
+            double precision :: ratemx
+            integer :: maxit
+            double precision :: stptol
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            integer :: iernew
+        end subroutine dnsid
+        subroutine dlinsd(neq,y,t,yprime,cj,tscale,p,pnrm,wt,lsoff,stptol,iret,res,ires,wm,iwm,fnrm,icopt,id,r,ynew,ypnew,icnflg,icnstr,rlx,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: t
+            double precision dimension(*) :: yprime
+            double precision :: cj
+            double precision :: tscale
+            double precision dimension(*) :: p
+            double precision :: pnrm
+            double precision dimension(*) :: wt
+            integer :: lsoff
+            double precision :: stptol
+            integer :: iret
+            external res
+            integer :: ires
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: fnrm
+            integer :: icopt
+            integer dimension(*) :: id
+            double precision dimension(*) :: r
+            double precision dimension(*) :: ynew
+            double precision dimension(*) :: ypnew
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            double precision :: rlx
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dlinsd
+        subroutine dfnrmd(neq,y,t,yprime,r,cj,tscale,wt,res,ires,fnorm,wm,iwm,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: t
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: r
+            double precision :: cj
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            external res
+            integer :: ires
+            double precision :: fnorm
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dfnrmd
+        subroutine dnedd(x,y,yprime,neq,res,jac,pdum,h,wt,jstart,idid,rpar,ipar,phi,gamma,dumsvr,delta,e,wm,iwm,cj,cjold,cjlast,s,uround,dume,dums,dumr,epcon,jcalc,jfdum,kp1,nonneg,ntype,iernls) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jac
+            double precision :: pdum
+            double precision :: h
+            double precision dimension(*) :: wt
+            integer :: jstart
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: gamma
+            double precision :: dumsvr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: cjold
+            double precision :: cjlast
+            double precision :: s
+            double precision :: uround
+            double precision :: dume
+            double precision :: dums
+            double precision :: dumr
+            double precision :: epcon
+            integer :: jcalc
+            integer :: jfdum
+            integer :: kp1
+            integer :: nonneg
+            integer :: ntype
+            integer :: iernls
+        end subroutine dnedd
+        subroutine dnsd(x,y,yprime,neq,res,pdum,wt,rpar,ipar,dumsvr,delta,e,wm,iwm,cj,dums,dumr,dume,epcon,s,confac,tolnew,muldel,maxit,ires,idum,iernew) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            external res
+            double precision :: pdum
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision :: dumsvr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: dums
+            double precision :: dumr
+            double precision :: dume
+            double precision :: epcon
+            double precision :: s
+            double precision :: confac
+            double precision :: tolnew
+            integer :: muldel
+            integer :: maxit
+            integer :: ires
+            integer :: idum
+            integer :: iernew
+        end subroutine dnsd
+        subroutine dmatd(neq,x,y,yprime,delta,cj,h,ier,ewt,e,wm,iwm,res,ires,uround,jac,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: delta
+            double precision :: cj
+            double precision :: h
+            integer :: ier
+            double precision dimension(*) :: ewt
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            external res
+            integer :: ires
+            double precision :: uround
+            external jac
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dmatd
+        subroutine dslvd(neq,delta,wm,iwm) ! in daskr/solver/ddaskr.f
+            integer :: neq
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+        end subroutine dslvd
+        subroutine ddasik(x,y,yprime,neq,icopt,id,res,jack,psol,h,tscale,wt,jskip,rpar,ipar,savr,delta,r,yic,ypic,pwk,wm,iwm,cj,uround,epli,sqrtn,rsqrtn,epcon,ratemx,stptol,jflg,icnflg,icnstr,iernls) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            external jack
+            external psol
+            double precision :: h
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            integer :: jskip
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: r
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision dimension(*) :: pwk
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epcon
+            double precision :: ratemx
+            double precision :: stptol
+            integer :: jflg
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            integer :: iernls
+        end subroutine ddasik
+        subroutine dnsik(x,y,yprime,neq,icopt,id,res,psol,wt,rpar,ipar,savr,delta,r,yic,ypic,pwk,wm,iwm,cj,tscale,sqrtn,rsqrtn,eplin,epcon,ratemx,maxit,stptol,icnflg,icnstr,iernew) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            integer :: icopt
+            integer dimension(*) :: id
+            external res
+            external psol
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: r
+            double precision dimension(*) :: yic
+            double precision dimension(*) :: ypic
+            double precision dimension(*) :: pwk
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: tscale
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: eplin
+            double precision :: epcon
+            double precision :: ratemx
+            integer :: maxit
+            double precision :: stptol
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            integer :: iernew
+        end subroutine dnsik
+        subroutine dlinsk(neq,y,t,yprime,savr,cj,tscale,p,pnrm,wt,sqrtn,rsqrtn,lsoff,stptol,iret,res,ires,psol,wm,iwm,rhok,fnrm,icopt,id,wp,iwp,r,eplin,ynew,ypnew,pwk,icnflg,icnstr,rlx,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: t
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision :: cj
+            double precision :: tscale
+            double precision dimension(*) :: p
+            double precision :: pnrm
+            double precision dimension(*) :: wt
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            integer :: lsoff
+            double precision :: stptol
+            integer :: iret
+            external res
+            integer :: ires
+            external psol
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: rhok
+            double precision :: fnrm
+            integer :: icopt
+            integer dimension(*) :: id
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision dimension(*) :: r
+            double precision :: eplin
+            double precision dimension(*) :: ynew
+            double precision dimension(*) :: ypnew
+            double precision dimension(*) :: pwk
+            integer :: icnflg
+            integer dimension(*) :: icnstr
+            double precision :: rlx
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dlinsk
+        subroutine dfnrmk(neq,y,t,yprime,savr,r,cj,tscale,wt,sqrtn,rsqrtn,res,ires,psol,irin,ier,fnorm,eplin,wp,iwp,pwk,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: t
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: r
+            double precision :: cj
+            double precision :: tscale
+            double precision dimension(*) :: wt
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            external res
+            integer :: ires
+            external psol
+            integer :: irin
+            integer :: ier
+            double precision :: fnorm
+            double precision :: eplin
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision dimension(*) :: pwk
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dfnrmk
+        subroutine dnedk(x,y,yprime,neq,res,jack,psol,h,wt,jstart,idid,rpar,ipar,phi,gamma,savr,delta,e,wm,iwm,cj,cjold,cjlast,s,uround,epli,sqrtn,rsqrtn,epcon,jcalc,jflg,kp1,nonneg,ntype,iernls) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jack
+            external psol
+            double precision :: h
+            double precision dimension(*) :: wt
+            integer :: jstart
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: gamma
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: cjold
+            double precision :: cjlast
+            double precision :: s
+            double precision :: uround
+            double precision :: epli
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: epcon
+            integer :: jcalc
+            integer :: jflg
+            integer :: kp1
+            integer :: nonneg
+            integer :: ntype
+            integer :: iernls
+        end subroutine dnedk
+        subroutine dnsk(x,y,yprime,neq,res,psol,wt,rpar,ipar,savr,delta,e,wm,iwm,cj,sqrtn,rsqrtn,eplin,epcon,s,confac,tolnew,muldel,maxit,ires,iersl,iernew) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer :: neq
+            external res
+            external psol
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: cj
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: eplin
+            double precision :: epcon
+            double precision :: s
+            double precision :: confac
+            double precision :: tolnew
+            integer :: muldel
+            integer :: maxit
+            integer :: ires
+            integer :: iersl
+            integer :: iernew
+        end subroutine dnsk
+        subroutine dslvk(neq,y,tn,yprime,savr,x,ewt,wm,iwm,res,ires,psol,iersl,cj,eplin,sqrtn,rsqrtn,rhok,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: tn
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: x
+            double precision dimension(*) :: ewt
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            external res
+            integer :: ires
+            external psol
+            integer :: iersl
+            double precision :: cj
+            double precision :: eplin
+            double precision :: sqrtn
+            double precision :: rsqrtn
+            double precision :: rhok
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dslvk
+        subroutine dspigm(neq,tn,y,yprime,savr,r,wght,maxl,maxlp1,kmp,eplin,cj,res,ires,nre,psol,npsl,z,v,hes,q,lgmr,wp,iwp,wk,dl,rhok,iflag,irst,nrsts,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer, optional,check(shape(v,0)==neq),depend(v) :: neq=shape(v,0)
+            double precision :: tn
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: r
+            double precision dimension(*) :: wght
+            integer :: maxl
+            integer, optional,check(shape(hes,0)==maxlp1),depend(hes) :: maxlp1=shape(hes,0)
+            integer :: kmp
+            double precision :: eplin
+            double precision :: cj
+            external res
+            integer :: ires
+            integer :: nre
+            external psol
+            integer :: npsl
+            double precision dimension(*) :: z
+            double precision dimension(neq,*) :: v
+            double precision dimension(maxlp1,*) :: hes
+            double precision dimension(*) :: q
+            integer :: lgmr
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision dimension(*) :: wk
+            double precision dimension(*) :: dl
+            double precision :: rhok
+            integer :: iflag
+            integer :: irst
+            integer :: nrsts
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dspigm
+        subroutine datv(neq,y,tn,yprime,savr,v,wght,yptem,res,ires,psol,z,vtem,wp,iwp,cj,eplin,ier,nre,npsl,rpar,ipar) ! in daskr/solver/ddaskr.f
+            use daskr__user__routines
+            integer :: neq
+            double precision dimension(*) :: y
+            double precision :: tn
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: v
+            double precision dimension(*) :: wght
+            double precision dimension(*) :: yptem
+            external res
+            integer :: ires
+            external psol
+            double precision dimension(*) :: z
+            double precision dimension(*) :: vtem
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision :: cj
+            double precision :: eplin
+            integer :: ier
+            integer :: nre
+            integer :: npsl
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine datv
+        subroutine dorth(vnew,v,hes,n,ll,ldhes,kmp,snormw) ! in daskr/solver/ddaskr.f
+            double precision dimension(*) :: vnew
+            double precision dimension(n,*) :: v
+            double precision dimension(ldhes,*) :: hes
+            integer, optional,check(shape(v,0)==n),depend(v) :: n=shape(v,0)
+            integer :: ll
+            integer, optional,check(shape(hes,0)==ldhes),depend(hes) :: ldhes=shape(hes,0)
+            integer :: kmp
+            double precision :: snormw
+        end subroutine dorth
+        subroutine dheqr(a,lda,n,q,info,ijob) ! in daskr/solver/ddaskr.f
+            double precision dimension(lda,*) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            double precision dimension(*) :: q
+            integer :: info
+            integer :: ijob
+        end subroutine dheqr
+        subroutine dhels(a,lda,n,q,b) ! in daskr/solver/ddaskr.f
+            double precision dimension(lda,*) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            double precision dimension(*) :: q
+            double precision dimension(*) :: b
+        end subroutine dhels
+        subroutine dgefa(a,lda,n,ipvt,info) ! in daskr/solver/dlinpk.f
+            double precision dimension(lda,1) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            integer dimension(1) :: ipvt
+            integer :: info
+        end subroutine dgefa
+        subroutine dgesl(a,lda,n,ipvt,b,job) ! in daskr/solver/dlinpk.f
+            double precision dimension(lda,1) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            integer dimension(1) :: ipvt
+            double precision dimension(1) :: b
+            integer :: job
+        end subroutine dgesl
+        subroutine dgbfa(abd,lda,n,ml,mu,ipvt,info) ! in daskr/solver/dlinpk.f
+            double precision dimension(lda,1) :: abd
+            integer, optional,check(shape(abd,0)==lda),depend(abd) :: lda=shape(abd,0)
+            integer :: n
+            integer :: ml
+            integer :: mu
+            integer dimension(1) :: ipvt
+            integer :: info
+        end subroutine dgbfa
+        subroutine dgbsl(abd,lda,n,ml,mu,ipvt,b,job) ! in daskr/solver/dlinpk.f
+            double precision dimension(lda,1) :: abd
+            integer, optional,check(shape(abd,0)==lda),depend(abd) :: lda=shape(abd,0)
+            integer :: n
+            integer :: ml
+            integer :: mu
+            integer dimension(1) :: ipvt
+            double precision dimension(1) :: b
+            integer :: job
+        end subroutine dgbsl
+        subroutine daxpy(n,da,dx,incx,dy,incy) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision :: da
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision dimension(1) :: dy
+            integer :: incy
+        end subroutine daxpy
+        subroutine dcopy(n,sx,incx,sy,incy) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: sx
+            integer :: incx
+            double precision dimension(1) :: sy
+            integer :: incy
+        end subroutine dcopy
+        subroutine dscal(n,da,dx,incx) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision :: da
+            double precision dimension(1) :: dx
+            integer :: incx
+        end subroutine dscal
+        function ddot(n,dx,incx,dy,incy) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision dimension(1) :: dy
+            integer :: incy
+            double precision :: ddot
+        end function ddot
+        function dnrm2(n,dx,incx) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision :: dnrm2
+        end function dnrm2
+        function idamax(n,dx,incx) ! in daskr/solver/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            integer :: idamax
+        end function idamax
+        subroutine dbanja(res,ires,neq,t,y,yprime,rewt,savr,wk,h,cj,wp,iwp,ier,rpar,ipar) ! in daskr/preconds/dbanpre.f
+            use daskr__user__routines
+            external res
+            integer :: ires
+            integer :: neq
+            double precision :: t
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: rewt
+            double precision dimension(*) :: savr
+            double precision dimension(*) :: wk
+            double precision :: h
+            double precision :: cj
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            integer :: ier
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dbanja
+        subroutine dbanps(neq,t,y,yprime,savr,wk,cj,wght,wp,iwp,b,eplin,ier,rpar,ipar) ! in daskr/preconds/dbanpre.f
+            integer :: neq
+            double precision :: t
+            double precision :: y
+            double precision :: yprime
+            double precision :: savr
+            double precision :: wk
+            double precision :: cj
+            double precision :: wght
+            double precision dimension(*) :: wp
+            integer dimension(*) :: iwp
+            double precision dimension(*) :: b
+            double precision :: eplin
+            integer :: ier
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dbanps
+        subroutine dspsetup(neq,lwp,liwp,rpar,ipar,ierr,lwp_min,liwp_min) ! in daskr/preconds/dilupre.f
+            integer :: neq
+            integer :: lwp
+            integer :: liwp
+            real*8 dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            integer :: ierr
+            integer :: lwp_min
+            integer :: liwp_min
+        end subroutine dspsetup
+        subroutine djacilu(res,ires,neq,t,y,yprime,rewt,savr,wk,h,cj,wp,iwp,ierr,rpar,ipar) ! in daskr/preconds/dilupre.f
+            use daskr__user__routines
+            external res
+            integer :: ires
+            integer, optional,check(len(y)>=neq),depend(y) :: neq=len(y)
+            real*8 :: t
+            real*8 dimension(neq) :: y
+            real*8 dimension(neq),depend(neq) :: yprime
+            real*8 dimension(neq),depend(neq) :: rewt
+            real*8 dimension(neq),depend(neq) :: savr
+            real*8 dimension(neq),depend(neq) :: wk
+            real*8 :: h
+            real*8 :: cj
+            real*8 dimension(*) :: wp
+            integer dimension(*) :: iwp
+            integer :: ierr
+            real*8 dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine djacilu
+        subroutine djcalc(neq,t,y,yprime,r0,ml,mu,r1,rewt,res,h,cj,nnzmx,jac,ja,ia,rcoo,jcoo,icoo,ipar,rpar,ires,nre,ierr) ! in daskr/preconds/dilupre.f
+            use daskr__user__routines
+            integer, optional,check(len(y)>=neq),depend(y) :: neq=len(y)
+            real*8 :: t
+            real*8 dimension(neq) :: y
+            real*8 dimension(neq),depend(neq) :: yprime
+            real*8 dimension(neq),depend(neq) :: r0
+            integer :: ml
+            integer :: mu
+            real*8 dimension(neq),depend(neq) :: r1
+            real*8 dimension(neq),depend(neq) :: rewt
+            external res
+            real*8 :: h
+            real*8 :: cj
+            integer, optional,check(len(jac)>=nnzmx),depend(jac) :: nnzmx=len(jac)
+            real*8 dimension(nnzmx) :: jac
+            integer dimension(nnzmx),depend(nnzmx) :: ja
+            integer dimension(neq + 1),depend(neq) :: ia
+            real*8 dimension(nnzmx),depend(nnzmx) :: rcoo
+            integer dimension(nnzmx),depend(nnzmx) :: jcoo
+            integer dimension(nnzmx),depend(nnzmx) :: icoo
+            integer dimension(*) :: ipar
+            real*8 dimension(*) :: rpar
+            integer :: ires
+            integer :: nre
+            integer :: ierr
+        end subroutine djcalc
+        subroutine dpsolilu(neq,t,y,yprime,r0,wk,cj,wght,wp,iwp,bl,eplin,ierr,rpar,ipar) ! in daskr/preconds/dilupre.f
+            integer, optional,check(len(y)>=neq),depend(y) :: neq=len(y)
+            real*8 :: t
+            real*8 dimension(neq) :: y
+            real*8 dimension(neq),depend(neq) :: yprime
+            real*8 dimension(neq),depend(neq) :: r0
+            real*8 dimension(neq),depend(neq) :: wk
+            real*8 :: cj
+            real*8 dimension(neq),depend(neq) :: wght
+            real*8 dimension(*) :: wp
+            integer dimension(*) :: iwp
+            real*8 dimension(neq),depend(neq) :: bl
+            real*8 :: eplin
+            integer :: ierr
+            real*8 dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine dpsolilu
+        subroutine djilu(neq,neqp1,nnzmx,jac,ja,ia,ju,plu,jlu,rwk1,iwk1,lenplumx,tolilut,lfililut,permtol,premeth,iperm,ierr) ! in daskr/preconds/dilupre.f
+            integer, optional,check(len(ju)>=neq),depend(ju) :: neq=len(ju)
+            integer, optional,check(len(ia)>=neqp1),depend(ia) :: neqp1=len(ia)
+            integer, optional,check(len(jac)>=nnzmx),depend(jac) :: nnzmx=len(jac)
+            real*8 dimension(nnzmx) :: jac
+            integer dimension(nnzmx),depend(nnzmx) :: ja
+            integer dimension(neqp1) :: ia
+            integer dimension(neq) :: ju
+            real*8 dimension(lenplumx) :: plu
+            integer dimension(lenplumx),depend(lenplumx) :: jlu
+            real*8 dimension(neq),depend(neq) :: rwk1
+            integer dimension(2 * neq),depend(neq) :: iwk1
+            integer, optional,check(len(plu)>=lenplumx),depend(plu) :: lenplumx=len(plu)
+            real*8 :: tolilut
+            integer :: lfililut
+            real*8 :: permtol
+            character*8 :: premeth
+            integer dimension(2 * neq),depend(neq) :: iperm
+            integer :: ierr
+        end subroutine djilu
+        subroutine djreord(neq,neqp1,nnzmx,premeth,jac,ja,ia,awk,jwk,iwk,perm,qperm,levels,mask,ireorder) ! in daskr/preconds/dilupre.f
+            integer, optional,check(len(perm)>=neq),depend(perm) :: neq=len(perm)
+            integer, optional,check(len(ia)>=neqp1),depend(ia) :: neqp1=len(ia)
+            integer, optional,check(len(jac)>=nnzmx),depend(jac) :: nnzmx=len(jac)
+            character*8 :: premeth
+            real*8 dimension(nnzmx) :: jac
+            integer dimension(nnzmx),depend(nnzmx) :: ja
+            integer dimension(neqp1) :: ia
+            real*8 dimension(nnzmx),depend(nnzmx) :: awk
+            integer dimension(nnzmx),depend(nnzmx) :: jwk
+            integer dimension(neqp1),depend(neqp1) :: iwk
+            integer dimension(neq) :: perm
+            integer dimension(neq),depend(neq) :: qperm
+            integer dimension(neq),depend(neq) :: levels
+            integer dimension(neq),depend(neq) :: mask
+            integer :: ireorder
+        end subroutine djreord
+        subroutine dmset2(mx,my,ns,nsd,lid,iwork) ! in daskr/preconds/drbdpre.f
+            integer :: mx
+            integer :: my
+            integer :: ns
+            integer :: nsd
+            integer :: lid
+            integer dimension(*) :: iwork
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine dmset2
+        subroutine drbdja(t,u,r0,rblock,r1,rewt,cj,bd,ipbd,ier) ! in daskr/preconds/drbdpre.f
+            use daskr__user__routines
+            double precision :: t
+            double precision dimension(*) :: u
+            double precision dimension(*) :: r0
+            external rblock
+            double precision dimension(*) :: r1
+            double precision dimension(*) :: rewt
+            double precision :: cj
+            double precision dimension(*) :: bd
+            integer dimension(*) :: ipbd
+            integer :: ier
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine drbdja
+        subroutine drbdps(b,bd,ipbd) ! in daskr/preconds/drbdpre.f
+            double precision dimension(*) :: b
+            double precision dimension(*) :: bd
+            integer dimension(*) :: ipbd
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine drbdps
+        subroutine dgset2(mx,my,ns,nsd,nxg,nyg,lid,iwork) ! in daskr/preconds/drbgpre.f
+            integer :: mx
+            integer :: my
+            integer :: ns
+            integer :: nsd
+            integer :: nxg
+            integer :: nyg
+            integer :: lid
+            integer dimension(*) :: iwork
+            integer :: ngx
+            integer :: ngy
+            integer :: ngrp
+            integer dimension(51) :: jgx
+            integer dimension(51) :: jgy
+            integer dimension(50) :: jigx
+            integer dimension(50) :: jigy
+            integer dimension(50) :: jxr
+            integer dimension(50) :: jyr
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /rpre2/ ngx,ngy,ngrp,jgx,jgy,jigx,jigy,jxr,jyr
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine dgset2
+        subroutine gset1(m,ng,jg,jig,jr) ! in daskr/preconds/drbgpre.f
+            integer :: m
+            integer :: ng
+            integer dimension(*) :: jg
+            integer dimension(*) :: jig
+            integer dimension(*) :: jr
+        end subroutine gset1
+        subroutine drbgja(t,u,r0,rblock,r1,rewt,cj,bd,ipbd,ier) ! in daskr/preconds/drbgpre.f
+            use daskr__user__routines
+            double precision :: t
+            double precision dimension(*) :: u
+            double precision dimension(*) :: r0
+            external rblock
+            double precision dimension(*) :: r1
+            double precision dimension(*) :: rewt
+            double precision :: cj
+            double precision dimension(*) :: bd
+            integer dimension(*) :: ipbd
+            integer :: ier
+            integer :: ngx
+            integer :: ngy
+            integer :: ngrp
+            integer dimension(51) :: jgx
+            integer dimension(51) :: jgy
+            integer dimension(50) :: jigx
+            integer dimension(50) :: jigy
+            integer dimension(50) :: jxr
+            integer dimension(50) :: jyr
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /rpre2/ ngx,ngy,ngrp,jgx,jgy,jigx,jigy,jxr,jyr
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine drbgja
+        subroutine drbgps(b,bd,ipbd) ! in daskr/preconds/drbgpre.f
+            double precision dimension(*) :: b
+            double precision dimension(*) :: bd
+            integer dimension(*) :: ipbd
+            integer :: ngx
+            integer :: ngy
+            integer :: ngrp
+            integer dimension(51) :: jgx
+            integer dimension(51) :: jgy
+            integer dimension(50) :: jigx
+            integer dimension(50) :: jigy
+            integer dimension(50) :: jxr
+            integer dimension(50) :: jyr
+            double precision :: srur
+            integer :: mp
+            integer :: mpd
+            integer :: mpsq
+            integer :: meshx
+            integer :: meshy
+            integer :: mxmp
+            common /rpre2/ ngx,ngy,ngrp,jgx,jgy,jigx,jigy,jxr,jyr
+            common /drpre1/ srur,mp,mpd,mpsq,meshx,meshy,mxmp
+        end subroutine drbgps
+        subroutine aplb(nrow,ncol,job,a,ja,ia,b,jb,ib,c,jc,ic,nzmax,iw,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer, optional,check(len(iw)>=ncol),depend(iw) :: ncol=len(iw)
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+            real*8 dimension(*) :: c
+            integer dimension(*) :: jc
+            integer dimension(nrow + 1),depend(nrow) :: ic
+            integer :: nzmax
+            integer dimension(ncol) :: iw
+            integer :: ierr
+        end subroutine aplb
+        subroutine aplb1(nrow,ncol,job,a,ja,ia,b,jb,ib,c,jc,ic,nzmax,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: ncol
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+            real*8 dimension(*) :: c
+            integer dimension(*) :: jc
+            integer dimension(nrow + 1),depend(nrow) :: ic
+            integer :: nzmax
+            integer :: ierr
+        end subroutine aplb1
+        subroutine aplsb(nrow,ncol,a,ja,ia,s,b,jb,ib,c,jc,ic,nzmax,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: ncol
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 :: s
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+            real*8 dimension(*) :: c
+            integer dimension(*) :: jc
+            integer dimension(nrow + 1),depend(nrow) :: ic
+            integer :: nzmax
+            integer :: ierr
+        end subroutine aplsb
+        subroutine diamua(nrow,job,a,ja,ia,diag,b,jb,ib) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(nrow),depend(nrow) :: diag
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+        end subroutine diamua
+        subroutine amudia(nrow,job,a,ja,ia,diag,b,jb,ib) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(nrow),depend(nrow) :: diag
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+        end subroutine amudia
+        subroutine aplsca(nrow,a,ja,ia,scal,iw) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 :: scal
+            integer dimension(*) :: iw
+        end subroutine aplsca
+        subroutine amux(n,x,y,a,ja,ia) ! in daskr/preconds/dsparsk.f
+            integer :: n
+            real*8 dimension(*) :: x
+            real*8 dimension(*) :: y
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+        end subroutine amux
+        subroutine prtmt(nrow,ncol,a,ja,ia,rhs,guesol,title,key,type_bn,ifmt,job,iounit) ! in daskr/preconds/dsparsk.f
+            integer :: nrow
+            integer :: ncol
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            real*8 dimension(*) :: rhs
+            character*2 :: guesol
+            character*72 :: title
+            character*8 :: key
+            character*3 :: type_bn
+            integer :: ifmt
+            integer :: job
+            integer :: iounit
+        end subroutine prtmt
+        subroutine csrdns(nrow,ncol,a,ja,ia,dns,ndns,ierr) ! in daskr/preconds/dsparsk.f
+            integer :: nrow
+            integer :: ncol
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            real*8 dimension(ndns,*) :: dns
+            integer, optional,check(shape(dns,0)==ndns),depend(dns) :: ndns=shape(dns,0)
+            integer :: ierr
+        end subroutine csrdns
+        subroutine coocsr(nrow,nnz,a,ir,jc,ao,jao,iao) ! in daskr/preconds/dsparsk.f
+            integer :: nrow
+            integer :: nnz
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ir
+            integer dimension(*) :: jc
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(*) :: iao
+        end subroutine coocsr
+        subroutine coicsr(n,nnz,job,a,ja,ia,iwk) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(iwk)-1)>=n),depend(iwk) :: n=(len(iwk)-1)
+            integer, optional,check(len(ja)>=nnz),depend(ja) :: nnz=len(ja)
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(nnz) :: ja
+            integer dimension(nnz),depend(nnz) :: ia
+            integer dimension(n + 1) :: iwk
+        end subroutine coicsr
+        subroutine csrcoo(nrow,job,nzmax,a,ja,ia,nnz,ao,ir,jc,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: job
+            integer :: nzmax
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            integer :: nnz
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: ir
+            integer dimension(*) :: jc
+            integer :: ierr
+        end subroutine csrcoo
+        subroutine csrcsc(n,job,ipos,a,ja,ia,ao,jao,iao) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            integer :: job
+            integer :: ipos
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(n + 1),depend(n) :: iao
+        end subroutine csrcsc
+        subroutine csrcsc2(n,n2,job,ipos,a,ja,ia,ao,jao,iao) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            integer, optional,check((len(iao)-1)>=n2),depend(iao) :: n2=(len(iao)-1)
+            integer :: job
+            integer :: ipos
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(n2 + 1) :: iao
+        end subroutine csrcsc2
+        subroutine csrdia(n,idiag,job,a,ja,ia,ndiag,diag,ioff,ao,jao,iao,ind) ! in daskr/preconds/dsparsk.f
+            integer :: n
+            integer, optional,check(shape(diag,1)==idiag),depend(diag) :: idiag=shape(diag,1)
+            integer :: job
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer, optional,check(shape(diag,0)==ndiag),depend(diag) :: ndiag=shape(diag,0)
+            real*8 dimension(ndiag,idiag) :: diag
+            integer dimension(*) :: ioff
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(*) :: iao
+            integer dimension(*) :: ind
+        end subroutine csrdia
+        subroutine csrbnd(n,a,ja,ia,job,abd,nabd,lowd,ml,mu,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: job
+            real*8 dimension(nabd,n),depend(n) :: abd
+            integer, optional,check(shape(abd,0)==nabd),depend(abd) :: nabd=shape(abd,0)
+            integer :: lowd
+            integer :: ml
+            integer :: mu
+            integer :: ierr
+        end subroutine csrbnd
+        subroutine rperm(nrow,a,ja,ia,ao,jao,iao,perm,job) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(nrow + 1),depend(nrow) :: iao
+            integer dimension(nrow),depend(nrow) :: perm
+            integer :: job
+        end subroutine rperm
+        subroutine cperm(nrow,a,ja,ia,ao,jao,iao,perm,job) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(nrow + 1),depend(nrow) :: iao
+            integer dimension(*) :: perm
+            integer :: job
+        end subroutine cperm
+        subroutine dperm(nrow,a,ja,ia,ao,jao,iao,perm,qperm,job) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(*) :: ao
+            integer dimension(*) :: jao
+            integer dimension(nrow + 1),depend(nrow) :: iao
+            integer dimension(nrow),depend(nrow) :: perm
+            integer dimension(*) :: qperm
+            integer :: job
+        end subroutine dperm
+        subroutine dvperm(n,x,perm) ! in daskr/preconds/dsparsk.f
+            integer, optional,check(len(x)>=n),depend(x) :: n=len(x)
+            real*8 dimension(n) :: x
+            integer dimension(n),depend(n) :: perm
+        end subroutine dvperm
+        subroutine ivperm(n,ix,perm) ! in daskr/preconds/dsparsk.f
+            integer, optional,check(len(ix)>=n),depend(ix) :: n=len(ix)
+            integer dimension(n) :: ix
+            integer dimension(n),depend(n) :: perm
+        end subroutine ivperm
+        subroutine diapos(n,ja,ia,idiag) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer dimension(n),depend(n) :: idiag
+        end subroutine diapos
+        subroutine getbwd(n,a,ja,ia,ml,mu) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: ml
+            integer :: mu
+        end subroutine getbwd
+        subroutine infdia(n,ja,ia,ind,idiag) ! in daskr/preconds/dsparsk.f
+            integer :: n
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer dimension(*) :: ind
+            integer :: idiag
+        end subroutine infdia
+        subroutine rnrms(nrow,nrm,a,ja,ia,diag) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: nrm
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(nrow),depend(nrow) :: diag
+        end subroutine rnrms
+        subroutine roscal(nrow,job,nrm,a,ja,ia,diag,b,jb,ib,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=nrow),depend(ia) :: nrow=(len(ia)-1)
+            integer :: job
+            integer :: nrm
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(nrow + 1) :: ia
+            real*8 dimension(nrow),depend(nrow) :: diag
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(nrow + 1),depend(nrow) :: ib
+            integer :: ierr
+        end subroutine roscal
+        subroutine ilut(n,a,ja,ia,lfil,droptol,alu,jlu,ju,iwk,w,jw,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: lfil
+            real*8 :: droptol
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(n),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer :: ierr
+        end subroutine ilut
+        subroutine ilutp(n,a,ja,ia,lfil,droptol,permtol,mbloc,alu,jlu,ju,iwk,w,jw,iperm,ierr) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            integer :: lfil
+            real*8 :: droptol
+            real*8 :: permtol
+            integer :: mbloc
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(n),depend(n) :: ju
+            integer :: iwk
+            real*8 dimension(n),depend(n) :: w
+            integer dimension(2 * n),depend(n) :: jw
+            integer dimension(2 * n),depend(n) :: iperm
+            integer :: ierr
+        end subroutine ilutp
+        subroutine qsplit(a,ind,n,ncut) ! in daskr/preconds/dsparsk.f
+            real*8 dimension(n) :: a
+            integer dimension(n),depend(n) :: ind
+            integer, optional,check(len(a)>=n),depend(a) :: n=len(a)
+            integer :: ncut
+        end subroutine qsplit
+        subroutine lusol(n,y,x,alu,jlu,ju) ! in daskr/preconds/dsparsk.f
+            integer, optional,check(len(y)>=n),depend(y) :: n=len(y)
+            real*8 dimension(n) :: y
+            real*8 dimension(n),depend(n) :: x
+            real*8 dimension(*) :: alu
+            integer dimension(*) :: jlu
+            integer dimension(*) :: ju
+        end subroutine lusol
+        subroutine dblstr(n,ja,ia,ip1,ip2,nfirst,riord,ndom,map,mapptr,mask,levels,iwk) ! in daskr/preconds/dsparsk.f
+            integer :: n
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer :: ip1
+            integer :: ip2
+            integer :: nfirst
+            integer dimension(*) :: riord
+            integer :: ndom
+            integer dimension(*) :: map
+            integer dimension(*) :: mapptr
+            integer dimension(*) :: mask
+            integer dimension(*) :: levels
+            integer dimension(*) :: iwk
+        end subroutine dblstr
+        subroutine bfs(n,ja,ia,nfirst,iperm,mask,maskval,riord,levels,nlev) ! in daskr/preconds/dsparsk.f
+            integer, optional,check(len(iperm)>=n),depend(iperm) :: n=len(iperm)
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer :: nfirst
+            integer dimension(n) :: iperm
+            integer dimension(n),depend(n) :: mask
+            integer :: maskval
+            integer dimension(*) :: riord
+            integer dimension(*) :: levels
+            integer :: nlev
+        end subroutine bfs
+        subroutine add_lvst(istart,iend,nlev,riord,ja,ia,mask,maskval) ! in daskr/preconds/dsparsk.f
+            integer :: istart
+            integer :: iend
+            integer :: nlev
+            integer dimension(*) :: riord
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer dimension(*) :: mask
+            integer :: maskval
+        end subroutine add_lvst
+        subroutine stripes(nlev,riord,levels,ip,map,mapptr,ndom) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(levels)-1)>=nlev),depend(levels) :: nlev=(len(levels)-1)
+            integer dimension(*) :: riord
+            integer dimension(nlev + 1) :: levels
+            integer :: ip
+            integer dimension(*) :: map
+            integer dimension(*) :: mapptr
+            integer :: ndom
+        end subroutine stripes
+        function maskdeg(ja,ia,nod,mask,maskval) ! in daskr/preconds/dsparsk.f
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer :: nod
+            integer dimension(*) :: mask
+            integer :: maskval
+            integer :: maskdeg
+        end function maskdeg
+        subroutine perphn(n,ja,ia,init,mask,maskval,nlev,riord,levels) ! in daskr/preconds/dsparsk.f
+            integer :: n
+            integer dimension(*) :: ja
+            integer dimension(*) :: ia
+            integer :: init
+            integer dimension(*) :: mask
+            integer :: maskval
+            integer :: nlev
+            integer dimension(*) :: riord
+            integer dimension(*) :: levels
+        end subroutine perphn
+        subroutine rversp(n,riord) ! in daskr/preconds/dsparsk.f
+            integer, optional,check(len(riord)>=n),depend(riord) :: n=len(riord)
+            integer dimension(n) :: riord
+        end subroutine rversp
+        subroutine atob(n,a,ja,ia,b,jb,ib) ! in daskr/preconds/dsparsk.f
+            integer, optional,check((len(ia)-1)>=n),depend(ia) :: n=(len(ia)-1)
+            real*8 dimension(*) :: a
+            integer dimension(*) :: ja
+            integer dimension(n + 1) :: ia
+            real*8 dimension(*) :: b
+            integer dimension(*) :: jb
+            integer dimension(n + 1),depend(n) :: ib
+        end subroutine atob
+    end interface
+end python module _daskr

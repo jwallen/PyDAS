@@ -1,0 +1,289 @@
+python module ddassl__user__routines 
+    interface
+        subroutine res(x,y,yprime,e,ires,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: e
+            integer :: ires
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine res
+        subroutine jac(x,y,yprime,e_wm_npd_er,cj,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision :: e_wm_npd_er
+            double precision :: cj
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine jac
+    end interface
+end python module ddassl__user__routines
+
+python module _dassl
+    interface
+        function d1mach(idum) ! in dassl/daux.f
+            integer :: idum
+            double precision :: d1mach
+        end function d1mach
+        subroutine xerrwv(msg,nmes,nerr,level,ni,i1,i2,nr,r1,r2) ! in dassl/daux.f
+            character dimension(nmes,1),intent(c) :: msg
+            integer, optional,check(shape(msg,0)==nmes),depend(msg) :: nmes=shape(msg,0)
+            integer :: nerr
+            integer :: level
+            integer :: ni
+            integer :: i1
+            integer :: i2
+            integer :: nr
+            double precision :: r1
+            double precision :: r2
+        end subroutine xerrwv
+        function i1mach(i) ! in dassl/daux.f
+            integer :: i
+            integer :: i1mach
+        end function i1mach
+        subroutine ddassl(res,neq,t,y,yprime,tout,info,rtol,atol,idid,rwork,lrw,iwork,liw,rpar,ipar,jac) ! in dassl/ddassl.f
+            use ddassl__user__routines
+            external res
+            integer :: neq
+            double precision :: t
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision :: tout
+            integer dimension(15) :: info
+            double precision dimension(*) :: rtol
+            double precision dimension(*) :: atol
+            integer :: idid
+            double precision dimension(*) :: rwork
+            integer :: lrw
+            integer dimension(*) :: iwork
+            integer :: liw
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            external jac
+        end subroutine ddassl
+        subroutine ddawts(neq,iwt,rtol,atol,y,wt,rpar,ipar) ! in dassl/ddassl.f
+            integer :: neq
+            integer :: iwt
+            double precision dimension(*) :: rtol
+            double precision dimension(*) :: atol
+            double precision dimension(*) :: y
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+        end subroutine ddawts
+        function ddanrm(neq,v,wt,rpar,ipar) ! in dassl/ddassl.f
+            integer, optional,check(len(v)>=neq),depend(v) :: neq=len(v)
+            double precision dimension(neq) :: v
+            double precision dimension(neq),depend(neq) :: wt
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision :: ddanrm
+        end function ddanrm
+        subroutine ddaini(x,y,yprime,neq,res,jac,h,wt,idid,rpar,ipar,phi,delta,e,wm,iwm,hmin,uround,nonneg,ntemp) ! in dassl/ddassl.f
+            use ddassl__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jac
+            double precision :: h
+            double precision dimension(*) :: wt
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision :: hmin
+            double precision :: uround
+            integer :: nonneg
+            integer :: ntemp
+        end subroutine ddaini
+        subroutine ddatrp(x,xout,yout,ypout,neq,kold,phi,psi) ! in dassl/ddassl.f
+            double precision :: x
+            double precision :: xout
+            double precision dimension(*) :: yout
+            double precision dimension(*) :: ypout
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            integer :: kold
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: psi
+        end subroutine ddatrp
+        subroutine ddastp(x,y,yprime,neq,res,jac,h,wt,jstart,idid,rpar,ipar,phi,delta,e,wm,iwm,alpha,beta,gamma,psi,sigma,cj,cjold,hold,s,hmin,uround,iphase,jcalc,k,kold,ns,nonneg,ntemp) ! in dassl/ddassl.f
+            use ddassl__user__routines
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            integer, optional,check(shape(phi,0)==neq),depend(phi) :: neq=shape(phi,0)
+            external res
+            external jac
+            double precision :: h
+            double precision dimension(*) :: wt
+            integer :: jstart
+            integer :: idid
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            double precision dimension(neq,*) :: phi
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            double precision dimension(*) :: alpha
+            double precision dimension(*) :: beta
+            double precision dimension(*) :: gamma
+            double precision dimension(*) :: psi
+            double precision dimension(*) :: sigma
+            double precision :: cj
+            double precision :: cjold
+            double precision :: hold
+            double precision :: s
+            double precision :: hmin
+            double precision :: uround
+            integer :: iphase
+            integer :: jcalc
+            integer :: k
+            integer :: kold
+            integer :: ns
+            integer :: nonneg
+            integer :: ntemp
+        end subroutine ddastp
+        subroutine ddajac(neq,x,y,yprime,delta,cj,h,ier,wt,e,wm,iwm,res,ires,uround,jac,rpar,ipar,ntemp) ! in dassl/ddassl.f
+            use ddassl__user__routines
+            integer :: neq
+            double precision :: x
+            double precision dimension(*) :: y
+            double precision dimension(*) :: yprime
+            double precision dimension(*) :: delta
+            double precision :: cj
+            double precision :: h
+            integer :: ier
+            double precision dimension(*) :: wt
+            double precision dimension(*) :: e
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+            external res
+            integer :: ires
+            double precision :: uround
+            external jac
+            double precision dimension(*) :: rpar
+            integer dimension(*) :: ipar
+            integer :: ntemp
+        end subroutine ddajac
+        subroutine ddaslv(neq,delta,wm,iwm) ! in dassl/ddassl.f
+            integer :: neq
+            double precision dimension(*) :: delta
+            double precision dimension(*) :: wm
+            integer dimension(*) :: iwm
+        end subroutine ddaslv
+        subroutine xermsg(librar,subrou,messg,nerr,level) ! in dassl/ddassl.f
+            character*(*) :: librar
+            character*(*) :: subrou
+            character*(*) :: messg
+            integer :: nerr
+            integer :: level
+        end subroutine xermsg
+        subroutine xerhlt(messg) ! in dassl/ddassl.f
+            character*(*) :: messg
+        end subroutine xerhlt
+        subroutine xerprn(prefix,npref,messg,nwrap) ! in dassl/ddassl.f
+            character*(*) :: prefix
+            integer :: npref
+            character*(*) :: messg
+            integer :: nwrap
+        end subroutine xerprn
+        subroutine xgetua(iunita,n) ! in dassl/ddassl.f
+            integer dimension(5) :: iunita
+            integer :: n
+            integer :: nunit
+            integer dimension(5) :: iunit
+            common /xeruni/ nunit,iunit
+        end subroutine xgetua
+        subroutine xsetua(iunita,n) ! in dassl/ddassl.f
+            integer dimension(5) :: iunita
+            integer :: n
+            integer :: nunit
+            integer dimension(5) :: iunit
+            common /xeruni/ nunit,iunit
+        end subroutine xsetua
+        subroutine dgefa(a,lda,n,ipvt,info) ! in dassl/dlinpk.f
+            double precision dimension(lda,1) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            integer dimension(1) :: ipvt
+            integer :: info
+        end subroutine dgefa
+        subroutine dgesl(a,lda,n,ipvt,b,job) ! in dassl/dlinpk.f
+            double precision dimension(lda,1) :: a
+            integer, optional,check(shape(a,0)==lda),depend(a) :: lda=shape(a,0)
+            integer :: n
+            integer dimension(1) :: ipvt
+            double precision dimension(1) :: b
+            integer :: job
+        end subroutine dgesl
+        subroutine dgbfa(abd,lda,n,ml,mu,ipvt,info) ! in dassl/dlinpk.f
+            double precision dimension(lda,1) :: abd
+            integer, optional,check(shape(abd,0)==lda),depend(abd) :: lda=shape(abd,0)
+            integer :: n
+            integer :: ml
+            integer :: mu
+            integer dimension(1) :: ipvt
+            integer :: info
+        end subroutine dgbfa
+        subroutine dgbsl(abd,lda,n,ml,mu,ipvt,b,job) ! in dassl/dlinpk.f
+            double precision dimension(lda,1) :: abd
+            integer, optional,check(shape(abd,0)==lda),depend(abd) :: lda=shape(abd,0)
+            integer :: n
+            integer :: ml
+            integer :: mu
+            integer dimension(1) :: ipvt
+            double precision dimension(1) :: b
+            integer :: job
+        end subroutine dgbsl
+        subroutine daxpy(n,da,dx,incx,dy,incy) ! in dassl/dlinpk.f
+            integer :: n
+            double precision :: da
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision dimension(1) :: dy
+            integer :: incy
+        end subroutine daxpy
+        subroutine dcopy(n,sx,incx,sy,incy) ! in dassl/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: sx
+            integer :: incx
+            double precision dimension(1) :: sy
+            integer :: incy
+        end subroutine dcopy
+        subroutine dscal(n,da,dx,incx) ! in dassl/dlinpk.f
+            integer :: n
+            double precision :: da
+            double precision dimension(1) :: dx
+            integer :: incx
+        end subroutine dscal
+        function ddot(n,dx,incx,dy,incy) ! in dassl/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision dimension(1) :: dy
+            integer :: incy
+            double precision :: ddot
+        end function ddot
+        function dnrm2(n,dx,incx) ! in dassl/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            double precision :: dnrm2
+        end function dnrm2
+        function idamax(n,dx,incx) ! in dassl/dlinpk.f
+            integer :: n
+            double precision dimension(1) :: dx
+            integer :: incx
+            integer :: idamax
+        end function idamax
+    end interface
+end python module _dassl
