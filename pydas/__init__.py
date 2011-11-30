@@ -26,3 +26,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
+
+from .dassl import DASSL, DASSLError
+from ._dassl import ddassl
