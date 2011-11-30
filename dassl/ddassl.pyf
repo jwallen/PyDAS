@@ -1,22 +1,22 @@
 python module ddassl__user__routines 
     interface
-        subroutine res(x,y,yprime,e,ires,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
-            double precision :: x
-            double precision dimension(*) :: y
-            double precision dimension(*) :: yprime
-            double precision dimension(*) :: e
-            integer :: ires
-            double precision dimension(*) :: rpar
-            integer dimension(*) :: ipar
+        subroutine res(t,y,yprime,delta,ires,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
+            double precision, intent(in) :: t
+            double precision dimension(ipar[0]), depend(ipar), intent(in) :: y
+            double precision dimension(ipar[0]), depend(ipar), intent(in) :: yprime
+            double precision dimension(ipar[0]), depend(ipar), intent(out) :: delta
+            integer, intent(out) :: ires
+            double precision dimension(1), intent(hide) :: rpar
+            integer dimension(1), intent(hide) :: ipar
         end subroutine res
-        subroutine jac(x,y,yprime,e_wm_npd_er,cj,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
-            double precision :: x
-            double precision dimension(*) :: y
-            double precision dimension(*) :: yprime
-            double precision :: e_wm_npd_er
-            double precision :: cj
-            double precision dimension(*) :: rpar
-            integer dimension(*) :: ipar
+        subroutine jac(t,y,yprime,pd,cj,rpar,ipar) ! in dassl/ddassl.f:ddajac:unknown_interface
+            double precision, intent(in) :: t
+            double precision dimension(ipar[0]), depend(ipar), intent(in) :: y
+            double precision dimension(ipar[0]), depend(ipar), intent(in) :: yprime
+            double precision dimension(ipar[0],ipar[0]), depend(ipar), intent(out) :: pd
+            double precision, intent(in) :: cj
+            double precision dimension(1), intent(hide) :: rpar
+            integer dimension(1), intent(hide) :: ipar
         end subroutine jac
     end interface
 end python module ddassl__user__routines
@@ -46,21 +46,21 @@ python module _dassl
         subroutine ddassl(res,neq,t,y,yprime,tout,info,rtol,atol,idid,rwork,lrw,iwork,liw,rpar,ipar,jac) ! in dassl/ddassl.f
             use ddassl__user__routines
             external res
-            integer :: neq
-            double precision :: t
-            double precision dimension(*) :: y
-            double precision dimension(*) :: yprime
-            double precision :: tout
+            integer, intent(in) :: neq
+            double precision, intent(inout) :: t
+            double precision dimension(neq), intent(inout) :: y
+            double precision dimension(neq), intent(inout) :: yprime
+            double precision, intent(in) :: tout
             integer dimension(15) :: info
-            double precision dimension(*) :: rtol
-            double precision dimension(*) :: atol
-            integer :: idid
-            double precision dimension(*) :: rwork
-            integer :: lrw
-            integer dimension(*) :: iwork
-            integer :: liw
-            double precision dimension(*) :: rpar
-            integer dimension(*) :: ipar
+            double precision dimension(*), intent(inout) :: rtol
+            double precision dimension(*), intent(inout) :: atol
+            integer, intent(out) :: idid
+            double precision dimension(lrw), intent(work) :: rwork
+            integer, intent(in) :: lrw
+            integer dimension(liw), intent(work) :: iwork
+            integer, intent(in) :: liw
+            double precision dimension(*), intent(inout) :: rpar
+            integer dimension(*), intent(inout) :: ipar
             external jac
         end subroutine ddassl
         subroutine ddawts(neq,iwt,rtol,atol,y,wt,rpar,ipar) ! in dassl/ddassl.f
