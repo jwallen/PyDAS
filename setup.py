@@ -27,37 +27,36 @@
 #
 ################################################################################
 
-import numpy
+try:
+    import numpy
+except ImportError:
+    print('The numpy package is required to install PyDAS.')
+    quit()
 
-if __name__ == '__main__':
-    
-    from distutils.core import setup
-    from distutils.extension import Extension
-    from Cython.Distutils import build_ext
-    
-    # Turn on HTML annotation file generation
-    import Cython.Compiler.Options
-    Cython.Compiler.Options.annotate = True
-    
-    # The Cython extension modules to compile
-    ext_modules = [
-        Extension(
-            'pydas', 
-            ['pydas.pyx'], 
-            include_dirs=['.', numpy.get_include()], 
-            libraries=['gfortran'], 
-            extra_objects=['dassl/daux.o','dassl/ddassl.o','dassl/dlinpk.o'],
-        ),
-    ]
+from numpy.distutils.misc_util import Configuration
+from numpy.distutils.core import setup
 
-    # Run the setup command
-    setup(name='PyDAS',
-        version='0.1.0',
-        description='A Python wrapper to several differential algebraic system solvers',
-        author='Joshua W. Allen',
-        author_email='jwallen@mit.edu',
-        url='http://github.com/jwallen/PyDAS',
-        py_modules=['pydas'],
-        cmdclass = {'build_ext': build_ext},
-        ext_modules = ext_modules
-    )
+################################################################################
+
+def configuration(parent_package='',top_path=None):
+    """
+    Return information about the extension modules for f2py to build.
+    """
+    config = Configuration('pydas', parent_package, top_path)
+    config.add_extension('_dassl', ['dassl/ddassl.f', 'dassl/daux.f', 'dassl/dlinpk.f', 'dassl/ddassl.pyf'])
+    config.add_extension('_daspk', ['daspk/solver/daux.f', 'daspk/solver/ddaspk.f', 'daspk/solver/dlinpk.f', 'daspk/preconds/dbanpre.f', 'daspk/preconds/dilupre.f', 'daspk/preconds/drbdpre.f', 'daspk/preconds/drbgpre.f', 'daspk/preconds/dsparsk.f', 'daspk/ddaspk.pyf'])
+    config.add_extension('_daskr', ['daskr/solver/daux.f', 'daskr/solver/ddaskr.f', 'daskr/solver/dlinpk.f', 'daskr/preconds/dbanpre.f', 'daskr/preconds/dilupre.f', 'daskr/preconds/drbdpre.f', 'daskr/preconds/drbgpre.f', 'daskr/preconds/dsparsk.f', 'daskr/ddaskr.pyf'])
+    return config
+
+setup(
+    name = 'PyDAS',
+    version = '0.1.0',
+    description = 'A Python wrapper to several differential algebraic system solvers',
+    author = 'Joshua W. Allen',
+    author_email = 'jwallen@mit.edu',
+    url = 'http://github.com/jwallen/PyDAS',
+    packages = ['pydas'],
+    configuration = configuration,
+    requires = ['numpy (>=1.3.0)'],
+    provides = ['pydas'],
+)
