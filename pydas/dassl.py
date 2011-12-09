@@ -222,8 +222,8 @@ class DASSL:
         """
         Invoke DASSL with the given state of the object.
         """
-        res = self.residual
-        jac = self.jacobian if hasattr(self, 'jacobian') else dummy_jacobian
+        res = self.__residual
+        jac = self.__jacobian if hasattr(self, 'jacobian') else dummy_jacobian
         self.t = numpy.array(self.t)
         
         first = True
@@ -253,7 +253,7 @@ class DASSL:
         # Let's return it to the user
         return self.idid
     
-    def residual(self, t, y, dydt):
+    def __residual(self, t, y, dydt):
         """
         Evaluate the residual function for this model, given the current value
         of the independent variable `t`, dependent variables `y`, and first
@@ -261,16 +261,22 @@ class DASSL:
         function and an integer with status information (0 if okay, -2 to
         terminate).
         """
-        raise DASSLError('You must implement the residual() method in your derived class.')
+        try:
+            return self.residual(t, y, dydt)
+        except AttributeError:
+            raise DASSLError('You must implement the residual() method in your derived class.')
     
-    #def jacobian(self, t, y, dydt, double cj):
-    #   """
-    #   Evaluate the Jacobian matrix for this model, given the current value
-    #   of the independent variable `t`, dependent variables `y`, and first
-    #   derivatives `dydt`. Return a numpy array with the values of the 
-    #   Jacobian matrix.
-    #   """
-    #   raise DASSLError('You must implement the jacobian() method in your derived class.')
+    def __jacobian(self, t, y, dydt, cj):
+       """
+       Evaluate the Jacobian matrix for this model, given the current value
+       of the independent variable `t`, dependent variables `y`, and first
+       derivatives `dydt`. Return a numpy array with the values of the 
+       Jacobian matrix.
+       """
+       try:
+           return self.jacobian(t, y, dydt, cj)
+       except AttributeError:
+           raise DASSLError('You must implement the jacobian() method in your derived class.')
 
 def dummy_jacobian(t, y, dydt, cj):
     return numpy.zeros(y.shape[0], numpy.float64)
