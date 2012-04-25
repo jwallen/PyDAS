@@ -114,10 +114,9 @@ Homebrew (http://mxcl.github.com/homebrew/) is an easy way to get gfortran::
     $ brew install gfortran
 
 But your system may still not be able to find the correct `libgfortran.a` library file 
-(see https://github.com/mxcl/homebrew/issues/8539 ). This should make it work::
+(see https://github.com/mxcl/homebrew/issues/8539 ). Also, there are some problems
+linking with `clang`, so you need to make it link with `gcc`. This one-liner should
+build and install, assuming you have numpy, cython, etc. all set up::
 
-    $ LIBRARY_PATH=/usr/local/lib/gcc/i686-apple-darwin11/4.2.1/x86_64/ make F77=gfortran
+    $ LIBRARY_PATH=/usr/local/lib/gcc LDSHARED='gcc -bundle -undefined dynamic_lookup -arch x86_64' make F77=gfortran install 
 
-Then, to get it installed into your proper python place::
-
-    $ make install

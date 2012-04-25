@@ -10,10 +10,16 @@
 
 all: DASSL DASPK DASKR cython
 
-cython:
+REQUIRED = dassl/daux.o dassl/ddassl.o dassl/dlinpk.o
+
+$(REQUIRED): DASSL
+	
+
+cython: $(REQUIRED) pydas.pyx
 	python setup.py build_ext $(CYTHON_FLAGS)
 
-install:
+
+install: $(REQUIRED) cython
 	python setup.py install
 
 DASSL:
@@ -26,6 +32,7 @@ DASKR:
 	$(MAKE) -C daskr F77=$(F77)
 
 clean: clean-DASSL clean-DASPK clean-DASKR clean-cython
+	rm -rf build
 
 clean-DASSL:
 	$(MAKE) -C dassl clean
