@@ -4,6 +4,10 @@
 #
 ################################################################################
 
+F77=gfortran
+
+CYTHON_FLAGS=--inplace
+
 -include make.inc
 
 .PHONY: DASSL DASPK DASKR cython clean
