@@ -1,0 +1,13 @@
+Before using, dump the contents of the solver folder in DASPK3.1 into this folder.  
+The files present should be as follows:
+    adf_dummy.f
+    daux.f
+    ddaskr.f
+    ddaspk.f
+    dlinpk.f
+    dsensd.f
+    mpi_dummy.f
+
+Making the PyDAS package will compile the fortran code as well as PyDAS wrappers.  
+Use the 'make daspk31' command in the parent folder to compile the fortran code for
+daspk31 only.

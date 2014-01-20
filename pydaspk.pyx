@@ -26,15 +26,15 @@
 ################################################################################
 
 """
-This `Cython <http://www.cython.org/>`_ module exposes the DASSL differential 
+This `Cython <http://www.cython.org/>`_ module exposes the DASPK3.1 differential 
 algebraic system solver to Python and provides a Python extension type, the 
-:class:`DASSL` base class, for working with DASSL.
+:class:`DASPK` base class, for working with DASPK.
 
-To use DASSL, write a Python class or Cython extension type that derives from
-the :class:`DASSL` class and implement the :meth:`residual`
+To use DASPK, write a Python class or Cython extension type that derives from
+the :class:`DASPK` class and implement the :meth:`residual`
 method, which accepts :math:`t`, :math:`\\mathbf{y}`, and 
 :math:`\\mathbf{\\frac{d \\mathbf{y}}{dt}}` as arguments and returns the
-corresponding value of :math:`\\mathbf{g} \\left(t, \\mathbf{y}, \\frac{d \\mathbf{y}}{dt} \\right)`.
+corresponding value of :math:`\\mathbf{g} \\left(t, \\mathbf{y}, \\frac{d \\mathbf{y}}{dt} \\right), \\mathbf{senpar}`.
 Run by calling the :meth:`initialize` method to set the initial conditions
 and solver tolerances, then by using the :meth:`advance` or :meth:`step`
 methods to move forward or backward in the independent variable. If you 
@@ -44,7 +44,7 @@ method to provide it to the solver.
 You can implement your derived class in pure Python, but for a significant
 speed boost consider using Cython to compile the module. You can see the
 proper Cython syntax for the residual and jacobian methods by looking at the
-corresponding methods in the :class:`DASSL` base class.
+corresponding methods in the :class:`DASPK` base class.
 """
 
 import numpy as np
@@ -54,9 +54,9 @@ cimport cython
 
 ################################################################################
 
-# Expose the (double-precision) DASSL function
-cdef extern from "das.h":
-    int ddassl_(
+# Expose the (double-precision) DASPK function
+cdef extern from "daspk.h":
+    int ddaspk_(
         void* res,      # The residual function that defines the ODE/DAE system
         int* neq,       # The number of equations to be solved
         double* t,      # The current value of the independent variable
@@ -73,12 +73,15 @@ cdef extern from "das.h":
         int* liw,       # The length of the integer workspace
         double* rpar,   # Double-precision parameters to pass to the residual and Jacobian functions
         int* ipar,      # Integer parameters to pass to the residual and Jacobian functions
-        void* jac       # The Jacobian function
+        void* jac,       # The Jacobian function
+        void* psol,      # Psol function
+        double* senpar,  # Sensitivity parameters
+        void* g_res     # G_res function
     )
 
 ################################################################################
 
-class DASSLError(Exception):
+class DASPKError(Exception):
     """
     An exception class for exceptions relating to use of DASSL.
     """
@@ -90,33 +93,34 @@ class DASSLError(Exception):
         return self.msg
 
 ################################################################################
-
-cdef class DASSL:
+cdef class DASPK:
     """
-    A base class for using the DASSL differential algebraic system solver by
-    L. R. Petzold. DASSL can be used to solve systems of the form
+    A base class for using the DASPK differential algebraic system solver by
+    L. R. Petzold. DASPK can be used to solve systems of the form
     
     .. math:: \\mathbf{g} \\left(t, \\mathbf{y}, \\frac{d \\mathbf{y}}{dt} \\right) = \\mathbf{0}
     
     where :math:`t` is the independent variable and :math:`\\mathbf{y}` is the
-    vector of dependent variables. DASSL uses the backward differentiation
+    vector of dependent variables. DASPK uses the backward differentiation
     formulas of orders one through five, and so is suitable for stiff problems.
-    In particular, DASSL is much more robust than VODE, the solver used by
+    In particular, DASPK is much more robust than VODE, the solver used by
     SciPy.
     
-    The DASSL solver options can be set by modifying the following attributes:
+    The DASPK solver options can be set by modifying the following attributes:
     
     =================== =================== ====================================
     Attribute           Type                Description
     =================== =================== ====================================
     `atol`              ``object``          The absolute tolerance, either a scalar or a vector
     `rtol`              ``object``          The relative tolerance, either a scalar or a vector
-    `maxOrder`          ``double``          The maximum order of the backward differentiation formulas, from ``1`` to ``5`` (default is ``5``)
+    `maxOrder`          ``int``             The maximum order of the backward differentiation formulas, from ``1`` to ``5`` (default is ``5``)
     `initialStep`       ``double``          An initial step size to use, or ``0`` to let DASSL choose
     `maximumStep`       ``double``          An maximum allowed step size to use, or ``0``
     `tstop`             ``object``          A value of the independent variable to avoid integrating past, e.g. if system is undefined there
     `bandwidths`        ``object``          If the Jacobian matrix is banded, contains the lower and upper half-bandwidths
     `nonnegative`       ``bool``            :data:`True` to force nonnegativity constraint on dependent variable, :data:`False` if not
+    `sensitivity`       ``bool``            :data:`True` if sensitivities are to be calculated, :data:`False` if not
+    `sensmethod`        ``int``             ``0`` to use default simultaneous corrector, ``1`` for staggered corrector, ``2`` for staggered direct method
     =================== =================== ====================================
     
     These options are passed to DASSL when the :meth:`initialize()` method is
@@ -129,10 +133,13 @@ cdef class DASSL:
     cdef public double maximumStep
     cdef public object bandwidths
     cdef public bint nonnegative
+    cdef public bint sensitivity
+    cdef public int sensmethod
     
     cdef public double t
     cdef public np.ndarray y
     cdef public np.ndarray dydt
+    cdef public np.ndarray senpar
     
     cdef np.ndarray info
     cdef np.ndarray atol
@@ -143,20 +150,22 @@ cdef class DASSL:
     cdef np.ndarray ipar
     cdef int idid
     
-    def __init__(self, maxOrder=5, initialStep=0, maximumStep=0, tstop=None, bandwidths=None, nonnegative=False):
+    def __init__(self, maxOrder=5, initialStep=0, maximumStep=0, tstop=None, bandwidths=None, nonnegative=False, sensitivity=False, sensmethod=0):
         self.maxOrder = maxOrder
         self.initialStep = initialStep
         self.maximumStep = maximumStep
         self.tstop = tstop
         self.bandwidths = bandwidths
         self.nonnegative = nonnegative
+        self.sensitivity = sensitivity
+        self.sensmethod = sensmethod
     
-    cpdef initialize(self, double t0, y0, dydt0=None, atol=1e-16, rtol=1e-8):
+    cpdef initialize(self, double t0, y0, dydt0=None, senpar=None, atol=1e-16, rtol=1e-8):
         """
-        Initialize the DASSL solver by setting the initial values of the
+        Initialize the DASPK solver by setting the initial values of the
         independent variable `t0`, dependent variables `y0`, and first
         derivatives `dydt0`. If provided, the derivatives must be consistent
-        with the other initial conditions; if not provided, DASSL will attempt
+        with the other initial conditions; if not provided, DASPK will attempt
         to estimate a consistent set of initial values for the derivatives.
         You can also set the absolute and relative tolerances `atol` and `rtol`,
         respectively, either as single values for all dependent variables or 
@@ -166,16 +175,16 @@ cdef class DASSL:
         cdef double rwork[3]
         cdef int iwork[3]
         cdef int i
-        cdef int neq, lrw, liw
+        cdef int neq, lrw, liw, npar, ny
         
         # Determine the number of equations
         neq = len(y0)
         if dydt0 is not None and len(dydt0) != neq:
-            raise DASSLError('Expected %i values of dydt0, got %i.' % (neq, len(dydt0)))
+            raise DASPKError('Expected %i values of dydt0, got %i.' % (neq, len(dydt0)))
         
         # Initialize all DASSL options to default values (i.e. all zeros)
         # Note that only the first 11 elements are used in DASSL
-        self.info = np.zeros(15, np.int32)
+        self.info = np.zeros(30, np.int32)
         
         # Tell DASSL we are initializing the problem
         self.info[0] = 0
@@ -212,10 +221,11 @@ cdef class DASSL:
             self.info[4] = 0
             
         # For banded matrices, set half-bandwidths
+        # Set this for direct methods only. Setting bandwidths improves performance of solver
         if self.bandwidths:
             self.info[5] = 1
-            iwork[0] = int(self.bandwidths[0])
-            iwork[1] = int(self.bandwidths[1])
+            iwork[0] = int(self.bandwidths[0])  # lower bandwidth 
+            iwork[1] = int(self.bandwidths[1])  # upper bandwidth
         else:
             self.info[5] = 0
             iwork[0] = 0
@@ -246,33 +256,130 @@ cdef class DASSL:
             self.info[8] = 1
             iwork[2] = int(self.maxOrder)
         else:
-            raise DASSLError('The maxOrder attribute should have a value between 1 and 5.')
+            raise DASPKError('The maxOrder attribute should have a value between 1 and 5.')
         
         # Turn on/off nonnegativity constraint
+        # Invoking nonnegativity should only be done in extreme circumstances
         if self.nonnegative:
             self.info[9] = 1
+            # nonnegative is a dummy variable, 
+            # iwork must be further specified for inequality constraints if this is specified
         else:
             self.info[9] = 0
                 
-        # If no initial derivatives provided, tell DASSL to attempt to guess them
-        if dydt0 is not None:
-            self.info[10] = 1
+        # Are the initial T, Y, Yprime consisten?
+        self.info[10] = 0    # yes they are
+        # self.info[10] = 1   # no they are not consistent
+        
+        # Use direct method in DDASPK
+        # self.info[11] = 0
+        # For iterative Krylov method
+        # self.info[11] = 1  
+        
+        # Related to Krylov method
+        # self.info[12] = 0
+        
+        # Proceed with integration after initial condition calculation is done, used with info(11) > 0
+        # self.info[13] = 0 # yes
+        # self.info[13] = 1 # no
+        
+        # Related to Krylov method
+        # self.info[14] = 0
+        
+        # Option to exclude algebraic variables from error test
+        # self.info[15]
+    
+        # Used when initial condition not specified info(11) > 0
+        # self.info[16]
+        
+        # Error control option for quadrature/output variables. This option is only used when info(28) > 0
+        # self.info[17]
+        
+        # Sensitivity analysis toggling
+        npar = 0  # number of parameter is zero unless sensitivity analysis is involved
+        if self.sensitivity:
+            # number of parameters involved in system to be solved, 
+            # including parameters that appear only in the initial conditions
+            npar = len(senpar)
+            self.info[18] = npar
+            
+            # Method used to calculate sensitivities
+            # Finite difference method is used for sensitivity analysis     
+            # Second order centered FDM is used
+            self.info[19] = 0   
+            # self.info[19] = 1 # First order forward FDM is used
+            # self.info[19] = 2 # Provide a user-supplied RES, where RES should also compute the residuals of the sensitivity equations
+            # IRES is used to determine whether to compute the sensitivities or not in the RES routine
+            # self.info[19] = 3, 4, or 5 related to ADIFOR-generated routines
+            
+            # Perturbation factor used when finite differences are used for sensitivity
+            self.info[20] = 0  # use default sensitivity
+            # self.info[20] = 1 # alter the value for the perturbation used
+                       
+            # Number of parameters that are involved in RES
+            self.info[21] = npar 
+            
+            # Error control for the sensitivity variables
+            self.info[22] = 0 # include error testsl
+            # self.info[22] = 1 # don't include error test
+            
+            # Sensitivity of a derived quantity
+            # In addition to computing the sensitivity of the solution, you may want to compute the sensitivity
+            # of a derived quantity with respect to the parameters
+            self.info[23] = 0 # Do not include sensitivity for derived quantity
+            # self.info[23] = 1 # Do sensitivity on derived quantity
+            
+            # Method option for sensitivity analysis
+            self.info[24] = self.sensmethod
+            
+            # For sensitivity calculations using the adjoing method.  If not using, set both to 0.
+            self.info[28] = 0
+            self.info[29] = 0
+        
         else:
-            self.info[10] = 0
+            self.info[18] = 0
+        
+        self.info[25] = 0  # serial computing, change this if doing parallel computing
+        self.info[26] = 0  # for parallel computing only if changed
+        self.info[27] = 0  # option for efficient computation of quadrature variables                  
+                           
         
         # Allocate rwork array
+        ny = neq / (npar + 1) # total number of state variables
         if self.info[4] == 1 and self.info[5] == 1:
-            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[0]+1) * neq
+            lrw = 50 + max(self.maxOrder + 4, 7) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * ny
         elif self.info[4] == 0 and self.info[5] == 1:
-            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[0]+1) * neq + 2*(neq/(2*self.bandwidths[0]+self.bandwidths[0]+1)+1)
+            lrw = 50 + max(self.maxOrder + 4, 7) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * ny + 2*(ny/(2*self.bandwidths[0]+self.bandwidths[1]+1)+1)
         else:
-            lrw = 40 + (self.maxOrder + 4) * neq + neq * neq
+            lrw = 50 + max(self.maxOrder + 4, 7) * neq + ny * ny
+        
+        if self.info[15] == 1:
+            lrw += neq
+            
+            
+            
         self.rwork = np.zeros(lrw, np.float64)
         for i in range(3): self.rwork[i] = rwork[i]
         
         # Declare iwork array
-        liw = 20 + neq
-        self.iwork = np.zeros(liw, np.int32)
+        liw = 40 + ny
+        if self.info[9] == 1 or self.info[9] == 3:
+            liw += ny
+        if self.info[10] == 1 or self.info[10] == 3:
+            liw += ny
+        if self.info[15] == 1:
+            liw += ny
+        if self.info[10] == 4 or self.info[10] == 5:
+            liw += 2*ny
+        if self.info[11] == 0 and self.info[4] == 2:
+            liw += ny
+        if self.info[18] > 0 and self.info[19] == 4:
+            liw += ny + 1 + self.rwork[16]*(2*ny*ny) + self.info[21]
+        if self.info[11] == 0 and self.info[4] == 2:
+            liw += 3*ny + self.info[21]
+        if self.info[19] == 5:
+            liw += 3*ny + self.info[21]
+        self.iwork = np.zeros(liw, np.int32)    
         for i in range(3): self.iwork[i] = iwork[i]
         
         # We don't use the rpar or ipar arrays, so set them to dummy values
@@ -300,9 +407,9 @@ cdef class DASSL:
         
         cdef int idid
         
-        # Tell DASSL to return solution at tout
+        # Tell DASPK to return solution at tout
         self.info[2] = 0 
-        # Call DASSL
+        # Call DASPK
         idid = self.solve(tout)
         return idid
         
@@ -325,13 +432,13 @@ cdef class DASSL:
         
     cdef solve(self, double tout):
         """
-        Invoke DASSL with the given state of the object.
+        Invoke DASPK with the given state of the object.
         """
         
         # Set the global DASSL object to this object (so we can get back to
         # this object's residual and jacobian methods
-        global dasslObject
-        dasslObject = self
+        global daspkObject
+        daspkObject = self
         
         cdef int neq = self.y.shape[0]
         cdef int lrw = self.rwork.shape[0]
@@ -339,13 +446,15 @@ cdef class DASSL:
         cdef bint first = True
         
         cdef void* res = <void*> residual
-        cdef void* jac = <void*> 0
+        cdef void* jac = <void*> 0        
+        cdef void* psol = <void*> 0
+        cdef void* g_res = <void*> 0
         if self.info[4] == 1:
             jac = <void*> jacobian
         
-        # Call DASSL
+        # Call DASPK
         while first or self.idid == -1:
-            ddassl_(
+            ddaspk_(
                 res,
                 &(neq),
                 &(self.t),
@@ -362,19 +471,22 @@ cdef class DASSL:
                 &(liw),
                 <np.float64_t*> self.rpar.data,
                 <int*> self.ipar.data,
-                jac
+                jac,
+                psol,
+                <np.float64_t*> self.senpar.data,
+                g_res,
             )
             first = False
             if self.idid == -1:
                 print('Attempting another 500 steps...')
                 self.info[0] = 1
         
-        # DASSL wrote onto the self.idid parameter automatically
+        # DASPK wrote onto the self.idid parameter automatically
         # Let's return it to the user
         return self.idid
         
     @cython.boundscheck(False)
-    def residual(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt):
+    def residual(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt, np.ndarray[np.float64_t,ndim=1] senpar):
         """
         Evaluate the residual function for this model, given the current value
         of the independent variable `t`, dependent variables `y`, and first
@@ -382,11 +494,11 @@ cdef class DASSL:
         function and an integer with status information (0 if okay, -2 to
         terminate).
         """
-        print('DASSLError: You must implement the residual() method in your derived class.')
+        print('DASPKError: You must implement the residual() method in your derived class.')
         return np.zeros(y.shape[0], np.float64), -2
     
     #@cython.boundscheck(False)
-    #def jacobian(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt, double cj):
+    #def jacobian(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt, double cj, np.ndarray[np.float64_t,ndim=1] senpar):
     #   """
     #   Evaluate the Jacobian matrix for this model, given the current value
     #   of the independent variable `t`, dependent variables `y`, and first
@@ -401,23 +513,22 @@ cdef class DASSL:
 # A module-level variable that contains the currently active DASSL object
 # The residual and jacobian functions use this to call the object's residual
 # and jacobian functions
-cdef DASSL dasslObject
+cdef DASPK daspkObject
 
 @cython.boundscheck(False)
-cdef void residual(double* t, double* y, double* yprime, double* delta, int* ires, double* rpar, int* ipar):
+cdef void residual(double* t, double* y, double* yprime, double* cj, double* delta, int* ires, double* rpar, int* ipar, double *senpar):
     cdef np.ndarray[np.float64_t,ndim=1] res
     cdef int i
-    res, ires[0] = dasslObject.residual(dasslObject.t, dasslObject.y, dasslObject.dydt)
+    res, ires[0] = daspkObject.residual(daspkObject.t, daspkObject.y, daspkObject.dydt, daspkObject.senpar)
     for i in range(res.shape[0]):
         delta[i] = res[i]
 
 @cython.boundscheck(False)
-cdef void jacobian(double* t, double* y, double* yprime, double* pd, double* cj, double* rpar, int* ipar):
+cdef void jacobian(double* t, double* y, double* yprime, double* pd, double* cj, double* rpar, int* ipar, double* senpar, int* ijac):
     cdef np.ndarray[np.float64_t,ndim=2] jac
     cdef int i, j
-    jac = dasslObject.jacobian(dasslObject.t, dasslObject.y, dasslObject.dydt, cj[0])
+    jac = daspkObject.jacobian(daspkObject.t, daspkObject.y, daspkObject.dydt, cj[0], daspkObject.senpar)
     N = jac.shape[0]
     for i in range(N):
         for j in range(N):
             pd[j*N+i] = jac[i,j]
-

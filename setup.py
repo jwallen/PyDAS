@@ -48,6 +48,13 @@ if __name__ == '__main__':
             libraries=['gfortran'], 
             extra_objects=['dassl/daux.o','dassl/ddassl.o','dassl/dlinpk.o'],
         ),
+        Extension(
+            'pydaspk', 
+            ['pydaspk.pyx'], 
+            include_dirs=['.', numpy.get_include()], 
+            libraries=['gfortran'], 
+            extra_objects=['daspk31/adf_dummy.o','daspk31/daux.o','daspk31/ddaspk.o','daspk31/dlinpk.o','daspk31/dsensd.o','daspk31/mpi_dummy.o'],
+        ),
     ]
 
     # Run the setup command
@@ -57,7 +64,7 @@ if __name__ == '__main__':
         author='Joshua W. Allen',
         author_email='jwallen@mit.edu',
         url='http://github.com/jwallen/PyDAS',
-        py_modules=['pydas'],
+        py_modules=['pydas','pydaspk'],
         cmdclass = {'build_ext': build_ext},
         ext_modules = ext_modules
     )

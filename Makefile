@@ -10,9 +10,9 @@ CYTHON_FLAGS=--inplace
 
 -include make.inc
 
-.PHONY: DASSL DASPK DASKR cython clean
+.PHONY: DASSL DASPK DASPK31 DASKR cython clean
 
-all: DASSL DASPK DASKR cython
+all: DASSL DASPK DASPK31 DASKR cython
 
 cython:
 	python setup.py build_ext $(CYTHON_FLAGS)
@@ -26,16 +26,22 @@ DASSL:
 DASPK:
 	$(MAKE) -C daspk F77=$(F77)
 
+DASPK31:
+	$(MAKE) -C daspk31 F77=$(F77)
+
 DASKR:
 	$(MAKE) -C daskr F77=$(F77)
 
-clean: clean-DASSL clean-DASPK clean-DASKR clean-cython
+clean: clean-DASSL clean-DASPK clean-DASPK31 clean-DASKR clean-cython
 
 clean-DASSL:
 	$(MAKE) -C dassl clean
 
 clean-DASPK:
 	$(MAKE) -C daspk clean
+
+clean-DASPK31:
+	$(MAKE) -C daspk31 clean
 
 clean-DASKR:
 	$(MAKE) -C daskr clean
@@ -60,7 +66,8 @@ help:
 	@echo "<target> is one of:"
 	@echo ""
 	@echo "    DASSL    to compile the DASSL solver"
-	@echo "    DASPK    to compile the DASPK solver"
+	@echo "    DASPK    to compile the DASPK solver"   
+	@echo "    DASPK31    to compile the DASPK31 solver"   
 	@echo "    DASKR    to compile the DASKR solver"
 	@echo "    cython   to compile the PyDAS Python wrapper modules"
 	@echo ""
