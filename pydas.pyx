@@ -262,9 +262,9 @@ cdef class DASSL:
         
         # Allocate rwork array
         if self.info[4] == 1 and self.info[5] == 1:
-            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[0]+1) * neq
+            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * neq
         elif self.info[4] == 0 and self.info[5] == 1:
-            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[0]+1) * neq + 2*(neq/(2*self.bandwidths[0]+self.bandwidths[0]+1)+1)
+            lrw = 40 + (self.maxOrder + 4) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * neq + 2*(neq/(self.bandwidths[0]+self.bandwidths[1]+1)+1)
         else:
             lrw = 40 + (self.maxOrder + 4) * neq + neq * neq
         self.rwork = np.zeros(lrw, np.float64)
