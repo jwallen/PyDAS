@@ -175,7 +175,7 @@ cdef class DASPK:
         cdef double rwork[3]
         cdef int iwork[3]
         cdef int i
-        cdef int neq, lrw, liw, npar, ny
+        cdef int neq, lrw, liw, npar, ny, itmp1, itmp2, itmp3
         
         # Determine the number of equations
         neq = len(y0)
@@ -300,6 +300,7 @@ cdef class DASPK:
         if self.sensitivity:
             # number of parameters involved in system to be solved, 
             # including parameters that appear only in the initial conditions
+            self.senpar = senpar
             npar = len(senpar)
             self.info[18] = npar
             
@@ -332,7 +333,7 @@ cdef class DASPK:
             # Method option for sensitivity analysis
             self.info[24] = self.sensmethod
             
-            # For sensitivity calculations using the adjoing method.  If not using, set both to 0.
+            # For sensitivity calculations using the adjoint method.  If not using, set both to 0.
             self.info[28] = 0
             self.info[29] = 0
         
@@ -346,17 +347,59 @@ cdef class DASPK:
         
         # Allocate rwork array
         ny = neq / (npar + 1) # total number of state variables
-        if self.info[4] == 1 and self.info[5] == 1:
-            lrw = 50 + max(self.maxOrder + 4, 7) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * ny
-        elif self.info[4] == 0 and self.info[5] == 1:
-            lrw = 50 + max(self.maxOrder + 4, 7) * neq + (2*self.bandwidths[0]+self.bandwidths[1]+1) * ny + 2*(ny/(2*self.bandwidths[0]+self.bandwidths[1]+1)+1)
-        else:
-            lrw = 50 + max(self.maxOrder + 4, 7) * neq + ny * ny
+        lrw = 50 + max(self.maxOrder + 4, 7) * neq
+#        if info[11] == 1: # Krylov method, not applicable here
+#            lrw += (MAXL+3+MIN0(1,MAXL-KMP))*NY + (MAXL+3)*MAXL + 1 + LENWP
+        
+        # initialize itmp values
+        itmp1 = 0
+        itmp2 = 0
+        itmp3 = 0
         
         if self.info[15] == 1:
             lrw += neq
-            
-            
+        
+        # Non-krylov method in use, ie. standard direct method
+        if self.info[11] == 0:
+            # dense matrix
+            if self.info[5] == 0:
+                lrw += ny * ny
+                if self.info[4] == 3:
+                    itmp1 = ny * (3 * ny)
+            if self.info[5] == 1: # banded matrix
+                lrw += (2*self.bandwidths[0]+self.bandwidths[1]+1) * ny
+                if self.info[4] == 0:
+                    itmp1 = 2*(ny/(self.bandwidths[0]+self.bandwidths[1]+1)+1)
+                if self.info[4] == 3:
+                    itmp1 = (self.bandwidths[0] + self.bandwidths[1] + 1) * (3 * ny)
+        # Krylov method, we don't actually use this
+        if self.info[11] == 1:
+            if self.info[4] == 2:
+                itmp1 = ny
+        
+        # index-2 two step process
+        if self.info[10] == 4:
+                if self.info[19] < 2 and self.info[18] == 0:
+                    itmp2 = 2 * ny
+                if self.info[19] < 2 and self.info[18] > 0:
+                    itmp2 = 2* neq + 4 * ny + 2 * self.info[23]
+                if self.info[19] > 2 and self.info[18] == 0:
+                    itmp2 = ny
+                if self.info[19] > 2 and self.info[18] > 0:
+                    itmp2 = 2 * ny + self.info[21]
+                    
+        # sensitivity analysis is on
+        if self.info[18] > 0:
+            if self.info[19] < 2:
+                itmp3 = 4 * ny + 2 * self.info[23]
+            if self.info[19] == 3:
+                itmp3 = self.info[18] * (2*ny + max(ny, self.info[23]) + self.info[21])
+            if self.info[19] == 4:
+                itmp3 = self.info[21]
+#            if info(19) == 5:   # provide an adifor generated routine for g_res
+#                itmp3 = info(18)*(ny+1) + rwork(17)*(2*ny*ny)
+        
+        lrw += max(itmp1, itmp2, itmp3)
             
         self.rwork = np.zeros(lrw, np.float64)
         for i in range(3): self.rwork[i] = rwork[i]
@@ -423,7 +466,6 @@ cdef class DASPK:
         """
         
         cdef int idid
-        
         # Tell DASSL to only take one simulation step towards tout
         self.info[2] = 1
         # Call DASSL
