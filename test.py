@@ -47,6 +47,39 @@ class DASPKSimpleModel(DASPK):
 
 ################################################################################
 
+class DASPKSensitivityModel(DASPK):
+    """
+    A model of first-order irreversible reactions in series
+    
+        A -> B -> C
+    
+    occurring in a batch reactor. In such a system the concentration
+    of the intermediate B has a maximum that depends on the relative
+    rate constants `k1` and `k2`. These are stored as data members of
+    the class so that they are available to the residual function.
+    """
+    
+    def __init__(self, sensitivity, sensmethod):
+        self.sensitivity = sensitivity
+        self.sensmethod = sensmethod
+    
+    def residual(self, t, y, dydt, senpar):
+        delta = numpy.zeros(y.shape[0], numpy.float64)
+        delta[0] = -senpar[0]* y[0] - dydt[0]
+        delta[1] =  senpar[0]* y[0] - senpar[1] * y[1] - dydt[1]
+        delta[2] =  senpar[1] * y[1] - dydt[2]
+        return delta, 0
+    
+    def jacobian(self, t, y, dydt, cj, senpar):
+        pd = -cj * numpy.identity(3, numpy.float64)
+        pd[0,0] += -senpar[0]
+        pd[1,0] += senpar[0]
+        pd[1,1] += -senpar[1]
+        pd[2,1] += senpar[1]
+        return pd
+
+################################################################################
+
 class DASPKCheck(unittest.TestCase):
     """
     Contains unit tests of the DASSL wrapper.
@@ -111,7 +144,89 @@ class DASPKCheck(unittest.TestCase):
         
 #        plt.plot(tvec,Avec,tvec,Bvec,tvec,Cvec)
 #        plt.show()
+
+    def testSensitivity(self):
+        """
+        This test solves a simple set of ODEs numerically using DASSL and
+        compares the result to a known analytical solution. The physical
+        system this problem represents is two first-order chemical reactions
+        in series in a homogeneous batch reactor.
+        
+        The governing equations are
+
+            dA/dt = -k1*A
+            dB/dt = k1*A - k2*B
+            dC/dt = k2*B
+
+        with initial conditions
+            A(0) = 1.0      B(0) = 0.0      C(0) = 0.0
+
+        and k1 = 1.0 and k2 = 0.25. The analytical solution is
+        
+            A(t) = exp(-k1*t)
+            B(t) = k1/(k2-k1) * (exp(-k1*t) - exp(-k2*t))
+            C(t) = (1 - k2/(k2-k1) * exp(-k1*t) - k1/(k2-k1) * exp(-k2*t)
             
+        Note that C(t) = A(0) - A(t) - B(t) since the governing equations are
+        conservative.
+
+        This tests whether finite difference sensitivities work in daspik
+        """
+
+    k1 = 1.0; k2 = 0.25
+    model = DASPKSensitivityModel(True, 1)
+    t0 = 0.0
+    n0 = numpy.array([1.0, 0.0, 0.0], numpy.float64)   #state variables 
+    senpar = numpy.array([k1,k2], numpy.float64)        
+    neq = len(n0)*(len(senpar)+1)
+    y0 = numpy.zeros(neq, numpy.float64)
+    atol = numpy.ones(neq,numpy.float64)*1e-5
+    rtol = numpy.ones(neq,numpy.float64)*1e-3
+    for i in range(len(n0)):
+        y0[i] = n0[i]
+        atol[i] = 1e-16
+        rtol[i] = 1e-8
+
+
+    dydt0 = model.residual(t0, y0, numpy.zeros(neq, numpy.float64),senpar)[0]
+    model.initialize(t0, y0, dydt0, senpar, atol=1e-8, rtol=1e-4)
+
+    #print 'y0'
+    print model.y
+    #print 'dydt0'
+    #print model.dydt
+    #print 'senpar'
+    #print model.senpar
+
+    tmax = 100; iter = 0; maxiter = 1000
+    #tvec = []
+    #Avec = []
+    #Bvec = []
+    #Cvec = []
+    while iter < 1000 and model.t < 16:
+        model.step(tmax)
+
+        t = model.t
+    #    A, B, C = model.y[:4]
+    #    Avec.append(A)
+    #    Bvec.append(B)
+    #    Cvec.append(C)
+    #    Atrue = math.exp(-k1*t)
+    #    Btrue = k1 / (k2 - k1) * (math.exp(-k1*t) - math.exp(-k2*t))
+    #    Ctrue = 1.0 - Atrue - Btrue
+    #    if Atrue > 1e-8:
+    #        self.assertAlmostEqual(A / Atrue, 1.0, 6)
+    #    if Btrue > 1e-8:
+    #        self.assertAlmostEqual(B / Btrue, 1.0, 6, 'At t = %g: B = %g, but Btrue = %g' % (t, B, Btrue))
+    #    if Ctrue > 1e-8:
+    #        self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
+
+    print 'Run completed'
+
+
+
+
+     
 ################################################################################
 
 class SimpleModel(DASSL):
