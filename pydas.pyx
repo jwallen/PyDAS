@@ -123,25 +123,7 @@ cdef class DASSL:
     called.
     """
     
-    cdef public int maxOrder
-    cdef public object tstop
-    cdef public double initialStep
-    cdef public double maximumStep
-    cdef public object bandwidths
-    cdef public bint nonnegative
-    
-    cdef public double t
-    cdef public np.ndarray y
-    cdef public np.ndarray dydt
-    
-    cdef np.ndarray info
-    cdef np.ndarray atol
-    cdef np.ndarray rtol
-    cdef np.ndarray rwork
-    cdef np.ndarray iwork
-    cdef np.ndarray rpar
-    cdef np.ndarray ipar
-    cdef int idid
+
     
     def __init__(self, maxOrder=5, initialStep=0, maximumStep=0, tstop=None, bandwidths=None, nonnegative=False):
         self.maxOrder = maxOrder
@@ -151,7 +133,7 @@ cdef class DASSL:
         self.bandwidths = bandwidths
         self.nonnegative = nonnegative
     
-    cpdef initialize(self, double t0, y0, dydt0=None, atol=1e-16, rtol=1e-8):
+    cpdef initialize(self, double t0, np.ndarray y0, np.ndarray dydt0=None, atol=1e-16, rtol=1e-8):
         """
         Initialize the DASSL solver by setting the initial values of the
         independent variable `t0`, dependent variables `y0`, and first
