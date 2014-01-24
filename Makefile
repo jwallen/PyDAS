@@ -10,12 +10,17 @@ CYTHON_FLAGS=--inplace
 
 -include make.inc
 
-.PHONY: DASSL DASPK DASPK31 DASKR cython clean
+.PHONY: DASSL DASPK DASPK31 DASKR cython clean 
 
-all: DASSL DASPK DASPK31 DASKR cython
+all: DASSL DASPK DASKR cython
+
+daspk: DASPK31 cython-daspk
 
 cython:
 	python setup.py build_ext $(CYTHON_FLAGS)
+
+cython-daspk:
+	python setup.py build_ext daspk $(CYTHON_FLAGS)
 
 install:
 	python setup.py install
@@ -58,6 +63,11 @@ help:
 	@echo "DASPK, and DASKR) to static libraries and compile the PyDAS Python modules"
 	@echo "that provide the Python interface to these solvers."
 	@echo ""
+	@echo "Typing \`make daspk\` after typing \`make\` will then additionally compile 
+	@echo "the optional DASPK 3.1 solver as well as the cython module pydaspk associated with it."
+	@echo "The DASPK 3.1 fortran source files must first be downloaded externally and placed"
+	@echo "in the daspk31 folder."
+	@echo ""
 	@echo "Typing \`make clean\` will delete all of the intermediate build files,"
 	@echo "compiled libraries, and compiled Python modules for all three DAE solvers and"
 	@echo "the PyDAS modules."
@@ -69,6 +79,7 @@ help:
 	@echo "    DASPK    to compile the DASPK solver"   
 	@echo "    DASPK31    to compile the DASPK31 solver"   
 	@echo "    DASKR    to compile the DASKR solver"
-	@echo "    cython   to compile the PyDAS Python wrapper modules"
+	@echo "    cython   to compile the PyDAS Python wrapper module for DASSL"
+	@echo "    cython-daspk   to compile the PyDAS Python wrapper module for both DASSL and DASPK3.1"
 	@echo ""
 

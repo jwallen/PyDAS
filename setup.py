@@ -28,6 +28,7 @@
 ################################################################################
 
 import numpy
+import sys
 
 if __name__ == '__main__':
     
@@ -40,22 +41,31 @@ if __name__ == '__main__':
     Cython.Compiler.Options.annotate = True
     
     # The Cython extension modules to compile
-    ext_modules = [
-        Extension(
+    pydas_ext = Extension(
             'pydas', 
             ['pydas.pyx'], 
             include_dirs=['.', numpy.get_include()], 
             libraries=['gfortran'], 
             extra_objects=['dassl/daux.o','dassl/ddassl.o','dassl/dlinpk.o'],
-        ),
-        Extension(
+        )
+    pydaspk_ext = Extension(
             'pydaspk', 
             ['pydaspk.pyx'], 
             include_dirs=['.', numpy.get_include()], 
             libraries=['gfortran'], 
             extra_objects=['daspk31/adf_dummy.o','daspk31/daux.o','daspk31/ddaspk.o','daspk31/dlinpk.o','daspk31/dsensd.o','daspk31/mpi_dummy.o'],
-        ),
-    ]
+        )
+    
+
+    modules = ['pydas']
+    extensions = [pydas_ext]
+
+    if 'daspk' in sys.argv:
+        print 'here'
+        # Optionally compile and make pydaspk if the user requests it
+        sys.argv.remove('daspk')
+        modules.append('pydaspk')
+        extensions.append(pydaspk_ext)
 
     # Run the setup command
     setup(name='PyDAS',
@@ -64,7 +74,7 @@ if __name__ == '__main__':
         author='Joshua W. Allen',
         author_email='jwallen@mit.edu',
         url='http://github.com/jwallen/PyDAS',
-        py_modules=['pydas','pydaspk'],
+        py_modules= modules,
         cmdclass = {'build_ext': build_ext},
-        ext_modules = ext_modules
+        ext_modules = extensions
     )
