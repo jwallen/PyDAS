@@ -63,7 +63,7 @@ class DASPKSensitivityModel(DASPK):
         self.sensmethod = sensmethod
     
     def residual(self, t, y, dydt, senpar):
-        delta = numpy.zeros(y.shape[0], numpy.float64)
+        delta = numpy.zeros(3, numpy.float64)
         delta[0] = -senpar[0]* y[0] - dydt[0]
         delta[1] =  senpar[0]* y[0] - senpar[1] * y[1] - dydt[1]
         delta[2] =  senpar[1] * y[1] - dydt[2]
@@ -172,55 +172,46 @@ class DASPKCheck(unittest.TestCase):
         This tests whether finite difference sensitivities work in daspik
         """
 
-    k1 = 1.0; k2 = 0.25
-    model = DASPKSensitivityModel(True, 1)
-    t0 = 0.0
-    n0 = numpy.array([1.0, 0.0, 0.0], numpy.float64)   #state variables 
-    senpar = numpy.array([k1,k2], numpy.float64)        
-    neq = len(n0)*(len(senpar)+1)
-    y0 = numpy.zeros(neq, numpy.float64)
-    atol = numpy.ones(neq,numpy.float64)*1e-5
-    rtol = numpy.ones(neq,numpy.float64)*1e-3
-    for i in range(len(n0)):
-        y0[i] = n0[i]
-        atol[i] = 1e-16
-        rtol[i] = 1e-8
+        k1 = 1.0; k2 = 0.25
+        model = DASPKSensitivityModel(True, 1)
+        t0 = 0.0
+        n0 = numpy.array([1.0, 0.0, 0.0], numpy.float64)   #state variables 
+        senpar = numpy.array([k1,k2], numpy.float64)        
+        neq = len(n0)*(len(senpar)+1)
+        y0 = numpy.zeros(neq, numpy.float64)
+        atol = numpy.ones(neq,numpy.float64)*1e-10
+        rtol = numpy.ones(neq,numpy.float64)*1e-8
+        for i in range(len(n0)):
+            y0[i] = n0[i]
+            atol[i] = 1e-16
+            rtol[i] = 1e-8
+        dydt0 = numpy.zeros(neq, numpy.float64)
+        dydt0[:3] = model.residual(t0, y0, numpy.zeros(neq, numpy.float64),senpar)[0]
+        model.initialize(t0, y0, dydt0, senpar, atol=atol, rtol=rtol)
 
+        tmax = 100; iter = 0; maxiter = 1000
+        #tvec = []
+        #Avec = []
+        #Bvec = []
+        #Cvec = []
+        while iter < 1000 and model.t < 16:
+            model.step(tmax)
 
-    dydt0 = model.residual(t0, y0, numpy.zeros(neq, numpy.float64),senpar)[0]
-    model.initialize(t0, y0, dydt0, senpar, atol=1e-8, rtol=1e-4)
+            t = model.t
+            A, B, C = model.y[:3]
+    #        Avec.append(A)
+    #        Bvec.append(B)
+    #        Cvec.append(C)
+            Atrue = math.exp(-k1*t)
+            Btrue = k1 / (k2 - k1) * (math.exp(-k1*t) - math.exp(-k2*t))
+            Ctrue = 1.0 - Atrue - Btrue
+            if Atrue > 1e-8:
+                self.assertAlmostEqual(A / Atrue, 1.0, 6)
+            if Btrue > 1e-8:
+                self.assertAlmostEqual(B / Btrue, 1.0, 6, 'At t = %g: B = %g, but Btrue = %g' % (t, B, Btrue))
+            if Ctrue > 1e-8:
+                self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
 
-    #print 'y0'
-    print model.y
-    #print 'dydt0'
-    #print model.dydt
-    #print 'senpar'
-    #print model.senpar
-
-    tmax = 100; iter = 0; maxiter = 1000
-    #tvec = []
-    #Avec = []
-    #Bvec = []
-    #Cvec = []
-    while iter < 1000 and model.t < 16:
-        model.step(tmax)
-
-        t = model.t
-    #    A, B, C = model.y[:4]
-    #    Avec.append(A)
-    #    Bvec.append(B)
-    #    Cvec.append(C)
-    #    Atrue = math.exp(-k1*t)
-    #    Btrue = k1 / (k2 - k1) * (math.exp(-k1*t) - math.exp(-k2*t))
-    #    Ctrue = 1.0 - Atrue - Btrue
-    #    if Atrue > 1e-8:
-    #        self.assertAlmostEqual(A / Atrue, 1.0, 6)
-    #    if Btrue > 1e-8:
-    #        self.assertAlmostEqual(B / Btrue, 1.0, 6, 'At t = %g: B = %g, but Btrue = %g' % (t, B, Btrue))
-    #    if Ctrue > 1e-8:
-    #        self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
-
-    print 'Run completed'
 
 
 ################################################################################
