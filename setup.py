@@ -61,7 +61,6 @@ if __name__ == '__main__':
     extensions = [pydas_ext]
 
     if 'daspk' in sys.argv:
-        print 'here'
         # Optionally compile and make pydaspk if the user requests it
         sys.argv.remove('daspk')
         modules.append('pydaspk')
