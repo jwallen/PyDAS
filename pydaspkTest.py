@@ -63,11 +63,22 @@ class DASPKSensitivityModel(DASPK):
         self.sensmethod = sensmethod
     
     def residual(self, t, y, dydt, senpar):
-        delta = numpy.zeros(3, numpy.float64)
-        delta[0] = -senpar[0]* y[0] - dydt[0]
-        delta[1] =  senpar[0]* y[0] - senpar[1] * y[1] - dydt[1]
-        delta[2] =  senpar[1] * y[1] - dydt[2]
-        return delta, 0
+        delta = numpy.zeros(9, numpy.float64)
+        delta[0] = -senpar[0]* y[0] 
+        delta[1] =  senpar[0]* y[0] - senpar[1] * y[1]
+        delta[2] =  senpar[1] * y[1]
+        numReactions = 2
+        numState = 3
+        for j in range(numReactions):
+            for i in range(numState):
+                for k in range(numState):
+                    delta[(j+1)*numState + i] += self.jacobian(t,y,dydt,0,senpar)[i,k]*y[(j+1)*numState + k]                     
+                delta[(j+1)*numState + i] += self.dgdk(y)[i,j]
+                
+                
+        for i in range(9):
+            delta[i] -= dydt[i]
+        return delta, 1
     
     def jacobian(self, t, y, dydt, cj, senpar):
         pd = -cj * numpy.identity(3, numpy.float64)
@@ -76,6 +87,14 @@ class DASPKSensitivityModel(DASPK):
         pd[1,1] += -senpar[1]
         pd[2,1] += senpar[1]
         return pd
+    
+    def dgdk(self,y):
+        deriv = numpy.zeros((3,2),numpy.float64)
+        deriv[0,0] = -y[0]
+        deriv[1,0] = y[0]
+        deriv[1,1] = -y[1]
+        deriv[2,1] = y[1]
+        return deriv
 
 ################################################################################
 
@@ -141,8 +160,8 @@ class DASPKCheck(unittest.TestCase):
             if Ctrue > 1e-8:
                 self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
         
-#        plt.plot(tvec,Avec,tvec,Bvec,tvec,Cvec)
-#        plt.show()
+        plt.plot(tvec,Avec,tvec,Bvec,tvec,Cvec)
+        plt.show()
 
     def testSensitivity(self):
         """
@@ -186,7 +205,8 @@ class DASPKCheck(unittest.TestCase):
             atol[i] = 1e-16
             rtol[i] = 1e-8
         dydt0 = numpy.zeros(neq, numpy.float64)
-        dydt0[:3] = model.residual(t0, y0, numpy.zeros(neq, numpy.float64),senpar)[0]
+        res = model.residual(t0, y0, numpy.zeros(neq, numpy.float64),senpar)[0]
+        dydt0[:len(res)] = res
         model.initialize(t0, y0, dydt0, senpar, atol=atol, rtol=rtol)
 
         tmax = 100; iter = 0; maxiter = 1000
@@ -201,7 +221,7 @@ class DASPKCheck(unittest.TestCase):
         Avec = []
         Bvec = []
         Cvec = []
-        while iter < 1000 and model.t < 1:
+        while iter < 1000 and model.t < 16:
             model.step(tmax)
             t = model.t
             A, B, C = model.y[:3]
@@ -219,22 +239,33 @@ class DASPKCheck(unittest.TestCase):
             Atrue = math.exp(-k1*t)
             Btrue = k1 / (k2 - k1) * (math.exp(-k1*t) - math.exp(-k2*t))
 
-#            Ctrue = 1.0 - Atrue - Btrue
-#            if Atrue > 1e-8:
-#                self.assertAlmostEqual(A / Atrue, 1.0, 6)
-#            if Btrue > 1e-8:
-#                self.assertAlmostEqual(B / Btrue, 1.0, 6, 'At t = %g: B = %g, but Btrue = %g' % (t, B, Btrue))
-#            if Ctrue > 1e-8:
-#                self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
+            Ctrue = 1.0 - Atrue - Btrue
+            if Atrue > 1e-8:
+                self.assertAlmostEqual(A / Atrue, 1.0, 6)
+            if Btrue > 1e-8:
+                self.assertAlmostEqual(B / Btrue, 1.0, 6, 'At t = %g: B = %g, but Btrue = %g' % (t, B, Btrue))
+            if Ctrue > 1e-8:
+                self.assertAlmostEqual(C / Ctrue, 1.0, 6, 'At t = %g: C = %g, but Ctrue = %g' % (t, C, Ctrue))
+                
+        print "At 16 seconds after simulation..."
+        print "dA/dk1 = %f" % dAdk1vec[-1]        
+        print "dB/dk1 = %f" % dBdk1vec[-1]        
+        print "dC/dk1 = %f" % dCdk1vec[-1]            
+        print "dA/dk2 = %f" % dAdk2vec[-1]
+        print "dB/dk2 = %f" % dBdk2vec[-1]
+        print "dC/dk2 = %f" % dCdk2vec[-1]
+        plt.figure(1)
         plt.plot(tvec, Avec, label='A')
         plt.plot(tvec, Bvec, label='B')
         plt.plot(tvec, Cvec, label='C')
-#        plt.plot(tvec,dAdk1vec,label='dA/dk1')
-#        plt.plot(tvec,dAdk2vec,label='dA/dk2')
-#        plt.plot(tvec,dBdk1vec,label='dB/dk1')
-#        plt.plot(tvec,dBdk2vec,label='dB/dk2')
-#        plt.plot(tvec,dCdk1vec,label='dC/dk1')
-#        plt.plot(tvec,dCdk2vec,label='dC/dk2')
+        plt.figure(2)
+        plt.plot(tvec,dAdk1vec,label='dA/dk1')
+        plt.plot(tvec,dAdk2vec,label='dA/dk2')
+        plt.plot(tvec,dBdk1vec,label='dB/dk1')
+        plt.plot(tvec,dBdk2vec,label='dB/dk2')
+        plt.plot(tvec,dCdk1vec,label='dC/dk1')
+        plt.plot(tvec,dCdk2vec,label='dC/dk2')
+        
         plt.legend()
         plt.show()
 
