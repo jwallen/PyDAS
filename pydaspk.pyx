@@ -284,9 +284,9 @@ cdef class DASPK:
             # Method used to calculate sensitivities
             # Finite difference method is used for sensitivity analysis     
             # Second order centered FDM is used
-            self.info[19] = 0   
+            #self.info[19] = 0   
             # self.info[19] = 1 # First order forward FDM is used
-            # self.info[19] = 2 # Provide a user-supplied RES, where RES should also compute the residuals of the sensitivity equations
+            self.info[19] = 2 # Provide a user-supplied RES, where RES should also compute the residuals of the sensitivity equations
             # IRES is used to determine whether to compute the sensitivities or not in the RES routine
             # self.info[19] = 3, 4, or 5 related to ADIFOR-generated routines
             
