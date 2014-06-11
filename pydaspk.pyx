@@ -2,7 +2,7 @@
 #
 #   PyDAS - A Python wrapper for several differential algebraic system solvers
 #
-#   Copyright (c) 2010-2014 by Joshua W. Allen (jwallen@mit.edu) 
+#   Copyright (c) 2010-2014 by Joshua W. Allen (joshua.w.allen@gmail.com) 
 #                           extended by Connie W. Gao (connieg@mit.edu)
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a

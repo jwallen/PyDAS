@@ -5,7 +5,8 @@
 #
 #   PyDAS - A Python wrapper to several differential algebraic system solvers
 #
-#   Copyright (c) 2010 by Joshua W. Allen (jwallen@mit.edu)
+#   Copyright (c) 2010-2014 by Joshua W. Allen (joshua.w.allen@gmail.com) 
+#                           extended by Connie W. Gao (connieg@mit.edu)
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
 #   copy of this software and associated documentation files (the 'Software'),
@@ -71,7 +72,7 @@ if __name__ == '__main__':
         version='0.1.0',
         description='A Python wrapper to several differential algebraic system solvers',
         author='Joshua W. Allen',
-        author_email='jwallen@mit.edu',
+        author_email='joshua.w.allen@gmail.com',
         url='http://github.com/jwallen/PyDAS',
         py_modules= modules,
         cmdclass = {'build_ext': build_ext},
