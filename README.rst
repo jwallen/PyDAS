@@ -106,18 +106,19 @@ the Makefiles (e.g. the Fortran compiler). An example of such a file,
 `make.inc.example`, has been provided.
 
 
-Mac OS X Lion
--------------
+Mac OS X
+---------
 
-Homebrew (http://mxcl.github.com/homebrew/) is an easy way to get gfortran::
+Homebrew (http://brew.sh) is an easy way to get gfortran::
 
-    $ brew install gfortran
+    $ brew install gcc
 
-But your system may still not be able to find the correct `libgfortran.a` library file 
-(see https://github.com/mxcl/homebrew/issues/8539 ). This should make it work::
+But your system may still not be able to find the correct `libgfortran.a` library file.
+This should make it work::
 
-    $ LIBRARY_PATH=/usr/local/lib/gcc/i686-apple-darwin11/4.2.1/x86_64/ make F77=gfortran
+    $ export LIBRARY_PATH=$(dirname `gfortran -print-libgcc-file-name`)
+    $ make F77=gfortran
 
-Then, to get it installed into your proper python place::
+Then, to get it installed into your proper python place (you may need to prefix this with ``sudo ``)::
 
-    $ make install
+    $ make install F77=gfortran
