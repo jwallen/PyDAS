@@ -11,10 +11,13 @@ cdef class DASSL:
     cdef public double maximumStep
     cdef public object bandwidths
     cdef public bint nonnegative
+    cdef public bint sensitivity
+    cdef public int sensmethod
     
     cdef public double t
     cdef public np.ndarray y
     cdef public np.ndarray dydt
+    cdef public np.ndarray senpar
     
     cdef np.ndarray info
     cdef np.ndarray atol
@@ -25,7 +28,7 @@ cdef class DASSL:
     cdef np.ndarray ipar
     cdef int idid
     
-    cpdef initialize(self, double t0, np.ndarray y0, np.ndarray dydt0=?, atol=?, rtol=?)
+    cpdef initialize(self, double t0, np.ndarray y0, np.ndarray dydt0=?, np.ndarray senpar=?, atol=?, rtol=?)
     
     cpdef advance(self, double tout)
     
