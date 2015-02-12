@@ -39,7 +39,8 @@ if __name__ == '__main__':
     try:
         from setuptools import setup, Extension
     except ImportError:
-        from distutils import setup, Extension
+        from distutils.core import setup
+        from distutils.extension import Extension
 
     from Cython.Distutils import build_ext
     
