@@ -82,6 +82,8 @@ if __name__ == '__main__':
         author_email='joshua.w.allen@gmail.com',
         url='http://github.com/jwallen/PyDAS',
         py_modules= modules,
+        packages = ['pydas'],
+        package_data = {'pydas': ['*.pxd']},
         cmdclass = {'build_ext': build_ext},
         ext_modules = extensions
     )
