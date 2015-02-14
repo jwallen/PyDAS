@@ -16,13 +16,13 @@ all: DASSL DASPK DASKR cython
 
 daspk: DASPK31 cython-daspk
 
-cython:
-	python setup.py build_ext $(CYTHON_FLAGS)
-
 cython-daspk:
 	python setup.py build_ext daspk $(CYTHON_FLAGS)
 
-install:
+cython: DASSL DASPK DASKR pydas.pyx
+	python setup.py build_ext $(CYTHON_FLAGS)
+
+install: DASSL DASPK DASKR cython
 	python setup.py install
 
 DASSL:
@@ -38,6 +38,7 @@ DASKR:
 	$(MAKE) -C daskr F77=$(F77)
 
 clean: clean-DASSL clean-DASPK clean-DASPK31 clean-DASKR clean-cython
+	rm -rf build
 
 clean-DASSL:
 	$(MAKE) -C dassl clean
