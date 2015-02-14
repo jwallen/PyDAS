@@ -27,3 +27,8 @@ build/*
 
 # make.inc (this file may vary significantly from platform to platform)
 make.inc
+
+# Eclipse project files
+/.project
+/.pydevproject
+/.settings
