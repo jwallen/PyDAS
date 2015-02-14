@@ -125,7 +125,7 @@ cdef class DASSL:
     
 
     
-    def __init__(self, maxOrder=5, initialStep=0, maximumStep=0, tstop=None, bandwidths=None, nonnegative=False):
+    def __init__(self, maxOrder=5, initialStep=0, maximumStep=0, tstop=None, bandwidths=None, nonnegative=False, **kwargs):
         self.maxOrder = maxOrder
         self.initialStep = initialStep
         self.maximumStep = maximumStep
@@ -133,7 +133,7 @@ cdef class DASSL:
         self.bandwidths = bandwidths
         self.nonnegative = nonnegative
     
-    cpdef initialize(self, double t0, np.ndarray y0, np.ndarray dydt0=None, atol=1e-16, rtol=1e-8):
+    cpdef initialize(self, double t0, np.ndarray y0, np.ndarray dydt0=None, np.ndarray senpar=np.zeros(1, np.int32), atol=1e-16, rtol=1e-8):
         """
         Initialize the DASSL solver by setting the initial values of the
         independent variable `t0`, dependent variables `y0`, and first
@@ -142,7 +142,8 @@ cdef class DASSL:
         to estimate a consistent set of initial values for the derivatives.
         You can also set the absolute and relative tolerances `atol` and `rtol`,
         respectively, either as single values for all dependent variables or 
-        individual values for each dependent variable.
+        individual values for each dependent variable. Here, `senpar` is a dummy 
+        variable and is unused since DASSL does not have sensitivity analysis support.
         """
         
         cdef double rwork[3]
@@ -185,6 +186,7 @@ cdef class DASSL:
             self.info[3] = 0
             rwork[0] = 0
         
+        self.senpar = senpar # this is a dummy variable so that PyDAS and PyDASK can be used interchangeably
         # Set whether or not jacobian function is provided
         # This is determined by whether or not you have implemented a
         # jacobian method
@@ -356,7 +358,7 @@ cdef class DASSL:
         return self.idid
         
     @cython.boundscheck(False)
-    def residual(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt):
+    def residual(self, double t, np.ndarray[np.float64_t,ndim=1] y, np.ndarray[np.float64_t,ndim=1] dydt, **kwargs):
         """
         Evaluate the residual function for this model, given the current value
         of the independent variable `t`, dependent variables `y`, and first
@@ -389,7 +391,7 @@ cdef DASSL dasslObject
 cdef void residual(double* t, double* y, double* yprime, double* delta, int* ires, double* rpar, int* ipar):
     cdef np.ndarray[np.float64_t,ndim=1] res
     cdef int i
-    res, ires[0] = dasslObject.residual(dasslObject.t, dasslObject.y, dasslObject.dydt)
+    res, ires[0] = dasslObject.residual(dasslObject.t, dasslObject.y, dasslObject.dydt, dasslObject.senpar)
     for i in range(res.shape[0]):
         delta[i] = res[i]
 
@@ -397,7 +399,7 @@ cdef void residual(double* t, double* y, double* yprime, double* delta, int* ire
 cdef void jacobian(double* t, double* y, double* yprime, double* pd, double* cj, double* rpar, int* ipar):
     cdef np.ndarray[np.float64_t,ndim=2] jac
     cdef int i, j
-    jac = dasslObject.jacobian(dasslObject.t, dasslObject.y, dasslObject.dydt, cj[0])
+    jac = dasslObject.jacobian(dasslObject.t, dasslObject.y, dasslObject.dydt, cj[0], dasslObject.senpar)
     N = jac.shape[0]
     for i in range(N):
         for j in range(N):
