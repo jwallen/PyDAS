@@ -27,3 +27,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 ################################################################################
+
+import os
+
+def get_include():
+    """
+    Return the PyDAS include directory.
+    """
+    return os.path.dirname(os.path.abspath(__file__))
