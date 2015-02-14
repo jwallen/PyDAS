@@ -7,7 +7,7 @@ This file contains unit tests for PyDASPK.
 
 import unittest
 
-from pydaspk import DASPK
+from pydas.daspk import DASPK
 import math
 import numpy
 import matplotlib.pyplot as plt

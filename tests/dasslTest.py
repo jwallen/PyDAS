@@ -7,7 +7,7 @@ This file contains unit tests for PyDAS.
 
 import unittest
 
-from pydas import DASSL
+from pydas.dassl import DASSL
 import math
 import numpy
 
