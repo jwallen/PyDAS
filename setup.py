@@ -33,8 +33,15 @@ import sys
 
 if __name__ == '__main__':
     
-    from distutils.core import setup
-    from distutils.extension import Extension
+    # Use setuptools by default (requires Python>=2.6) if available
+    # If not available, fall back to distutils
+    # Using setuptools enables support for compiling wheels
+    try:
+        from setuptools import setup, Extension
+    except ImportError:
+        from distutils.core import setup
+        from distutils.extension import Extension
+
     from Cython.Distutils import build_ext
     
     # Turn on HTML annotation file generation
