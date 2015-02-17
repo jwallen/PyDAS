@@ -30,14 +30,14 @@ class SimpleModel(DASSL):
         self.k1 = k1
         self.k2 = k2
     
-    def residual(self, t, y, dydt, senpar):
+    def residual(self, t, y, dydt):
         delta = numpy.zeros(y.shape[0], numpy.float64)
         delta[0] = -self.k1 * y[0] - dydt[0]
         delta[1] =  self.k1 * y[0] - self.k2 * y[1] - dydt[1]
         delta[2] =  self.k2 * y[1] - dydt[2]
         return delta, 0
     
-    def jacobian(self, t, y, dydt, cj, senpar):
+    def jacobian(self, t, y, dydt, cj):
         pd = -cj * numpy.identity(y.shape[0], numpy.float64)
         pd[0,0] += -self.k1
         pd[1,0] += self.k1
@@ -82,7 +82,7 @@ class DASSLCheck(unittest.TestCase):
         k1 = 1.0; k2 = 0.25
         model = SimpleModel(k1, k2)
         t0 = 0.0; y0 = numpy.array([1.0, 0.0, 0.0], numpy.float64)
-        dydt0 = model.residual(t0, y0, numpy.zeros(3, numpy.float64),numpy.zeros(3, numpy.float64))[0]
+        dydt0 = model.residual(t0, y0, numpy.zeros(3, numpy.float64))[0]
         model.initialize(t0, y0, dydt0, atol=1e-16, rtol=1e-8)
         
         tmax = 100; iter = 0; maxiter = 1000

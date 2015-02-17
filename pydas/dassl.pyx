@@ -185,8 +185,7 @@ cdef class DASSL:
         else:
             self.info[3] = 0
             rwork[0] = 0
-        
-        self.senpar = senpar # this is a dummy variable so that PyDAS and PyDASK can be used interchangeably
+            
         # Set whether or not jacobian function is provided
         # This is determined by whether or not you have implemented a
         # jacobian method
@@ -391,7 +390,7 @@ cdef DASSL dasslObject
 cdef void residual(double* t, double* y, double* yprime, double* delta, int* ires, double* rpar, int* ipar):
     cdef np.ndarray[np.float64_t,ndim=1] res
     cdef int i
-    res, ires[0] = dasslObject.residual(dasslObject.t, dasslObject.y, dasslObject.dydt, dasslObject.senpar)
+    res, ires[0] = dasslObject.residual(dasslObject.t, dasslObject.y, dasslObject.dydt)
     for i in range(res.shape[0]):
         delta[i] = res[i]
 
@@ -399,7 +398,7 @@ cdef void residual(double* t, double* y, double* yprime, double* delta, int* ire
 cdef void jacobian(double* t, double* y, double* yprime, double* pd, double* cj, double* rpar, int* ipar):
     cdef np.ndarray[np.float64_t,ndim=2] jac
     cdef int i, j
-    jac = dasslObject.jacobian(dasslObject.t, dasslObject.y, dasslObject.dydt, cj[0], dasslObject.senpar)
+    jac = dasslObject.jacobian(dasslObject.t, dasslObject.y, dasslObject.dydt, cj[0])
     N = jac.shape[0]
     for i in range(N):
         for j in range(N):
