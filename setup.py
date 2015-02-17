@@ -61,7 +61,7 @@ if __name__ == '__main__':
             ['pydas/daspk.pyx'], 
             include_dirs=['pydas', numpy.get_include()], 
             libraries=['gfortran'], 
-            extra_objects=['daspk31/adf_dummy.o','daspk31/daux.o','daspk31/ddaspk.o','daspk31/dlinpk.o','daspk31/dsensd.o','daspk31/mpi_dummy.o'],
+            extra_objects=['daspk31/solver/adf_dummy.o','daspk31/solver/daux.o','daspk31/solver/ddaspk.o','daspk31/solver/dlinpk.o','daspk31/solver/dsensd.o','daspk31/solver/mpi_dummy.o'],
         )
     
 
