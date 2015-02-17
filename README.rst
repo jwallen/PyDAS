@@ -13,6 +13,12 @@ provides a Python extension type for each solver, which in turn provides a
 Pythonic means of setting the solver options, providing residual and jacobian
 functions, and running the solver.
 
+In addition, PyDAS also provides a wrapper to the DASPK3.1 solver, which
+has native sensitivity analysis. The source code for DASPK3.1 is subject to
+copyright restrictions but is available for research purposes. Due to these
+restrictions, it is up to the user to download these source files manually.
+Please see the README file inside the daspk31/ folder for more details.  
+
 The DASSL, DASPK, and DASKR solvers are all substantially more robust than
 VODE, the solver used within the ODE solver functionality provided by 
 `SciPy <http://www.scipy.org/>`_.
@@ -71,13 +77,14 @@ Installation
 
 .. note:: 
 
-    Currently only the DASSL solver has been wrapped. The installation 
-    scripts therefore only build and install the DASSL wrapper by default.
+    Currently only the DASSL and DASPK3.1 solvers have been wrapped. 
+    The installation scripts only build and install the DASSL wrapper
+    by default. The DASPK wrapper must be installed with additional arguments.
 
 Windows
 -------
 
-The provided batch scripts will compile all of the solvers and the PyDAS
+The provided batch scripts will compile the DASSL solver and the PyDAS
 wrapper code. These scripts presume that you have the 32-bit version of the
 MinGW C and Fortran compilers installed. Once you have run the batch script,
 you can install PyDAS into your Python packages if you desire by running the
@@ -85,17 +92,26 @@ following command from the base package directory:
 
     > python setup.py install
 
+
 Linux
 -----
 
-A Makefile has been provided that can be used to compile all of the solvers
-and the PyDAS wrapper code. To use, invoke the following command from the
+A Makefile has been provided that can be used to compile the DASSL solver and
+DASSL wrapper code. To use, invoke the following command from the
 base package directory::
 
     $ make
 
 This command will build PyDAS in-place, rather than installing it to your
-Python package directory. If you wish to formall install PyDAS, run the
+Python package directory.
+
+If you wish to compile the DASPK3.1 solver and wrapper, use the command 
+(Make sure you have already downloaded the fortran source files.  See the
+daspk/README file for more details)::
+
+    $ make daspk
+
+ If you wish to formall install PyDAS, run the
 following command from the base package directory after the ``make`` command
 (you may need root privileges for this)::
 
@@ -104,6 +120,7 @@ following command from the base package directory after the ``make`` command
 You may wish to write a file `make.inc` that sets certain variables used by
 the Makefiles (e.g. the Fortran compiler). An example of such a file, 
 `make.inc.example`, has been provided.
+
 
 
 Mac OS X
