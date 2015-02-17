@@ -84,8 +84,11 @@ Installation
 Windows
 -------
 
-The provided batch scripts will compile the DASSL solver and the PyDAS
-wrapper code. These scripts presume that you have the 32-bit version of the
+The provided make.bat batch script will compile the DASSL solver and the PyDAS
+wrapper code. Use the make_daspk.bat script to compile the DASPK3.1 solver and the
+DASPK wrapper code.  Make sure you have manually downloaded the DASPK3.1 source
+files into the daspk31 folder.  See the daspk31/README file for more details.
+These scripts presume that you have the 32-bit version of the
 MinGW C and Fortran compilers installed. Once you have run the batch script,
 you can install PyDAS into your Python packages if you desire by running the
 following command from the base package directory:
