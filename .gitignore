@@ -32,3 +32,6 @@ make.inc
 /.project
 /.pydevproject
 /.settings
+
+# DASPK3.1 source files
+daspk31/*
