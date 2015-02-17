@@ -19,7 +19,7 @@ daspk: DASPK31 cython-daspk
 cython-daspk:
 	python setup.py build_ext daspk $(CYTHON_FLAGS)
 
-cython: DASSL DASPK DASKR pydas/dassl.pyx
+cython: DASSL DASPK DASKR 
 	python setup.py build_ext $(CYTHON_FLAGS)
 
 install: DASSL DASPK DASKR cython
