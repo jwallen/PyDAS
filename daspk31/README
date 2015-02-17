@@ -1,9 +1,11 @@
 DASPK 3.1
 Large Scale Differential Algebraic Equation Solver with Sensitivity Analysis
 
-Before using, dump the source files of the DASPK 3.1 solver folder into this folder.  
-The fortran solver can be downloaded here: http://www.engineering.ucsb.edu/~cse/software.html
-The files present should be as follows:
+Before using, dump the files from the DASPK 3.1 source code into this folder. 
+You can use the script download_daspk31.sh to automatically download and unpack the source files
+or download it manually from the web here: http://www.engineering.ucsb.edu/~cse/software.html 
+
+The following files should be present in the 'solver' folder:
     adf_dummy.f
     daux.f
     ddaskr.f

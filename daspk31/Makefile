@@ -8,7 +8,7 @@ F77=gfortran
 
 CFLAGS=-fPIC -O3
 
-DOBJ=adf_dummy.o daux.o ddaskr.o ddaspk.o dlinpk.o dsensd.o mpi_dummy.o
+DOBJ=solver/adf_dummy.o solver/daux.o solver/ddaskr.o solver/ddaspk.o solver/dlinpk.o solver/dsensd.o solver/mpi_dummy.o
 
 DLIB=libddaspk31.a
 
