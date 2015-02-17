@@ -24,6 +24,11 @@ provides these compilers.
 The DASSL, DASPK, and DASKR solvers are provided with the PyDAS package; you
 do not need to download them separately.
 
+The DASPK3.1 solver is subject to copyright restrictions and therefore
+must be downloaded separately either using the ``daspk31/download_daspk31.sh`` 
+script or by manually unpacking the files from the daspk31 source code
+found on `Linda Petzold's software page <http://www.cs.ucsb.edu/~cse/software.html>`_ into the ``daspk31`` folder.
+
 .. [#f1] The Fortran interfaces are exposed to Python via C, so the installer
     needs to be able to link object files from Fortran and C for this to work.
 
@@ -48,6 +53,12 @@ Python package directory. At this point you can optionally run the unit test
 script ``test.py`` and/or any of the provided examples to confirm that PyDAS
 was compiled successfully.
 
+If you wish to compile the DASPK3.1 solver and wrapper, use the command. 
+Make sure you have already downloaded the fortran source files.  See the
+``daspk/README`` file for where to download the files.::
+
+    $ make daspk
+
 If you wish to formally install PyDAS, run the following command from the root 
 package directory after the ``make`` command (you may need root privileges for 
 this)::
@@ -70,9 +81,11 @@ Windows
     from the ``cython-dev`` mailing list for more information.
 
 A batch script ``make.bat`` has been provided in the root package directory.
-Double-clicking this script will cause all of the solvers -- DASSL, DASPK, and
-DASKR -- to be compiled into static libraries and the PyDAS wrapper code to be
-compiled. 
+Double-clicking this script will compile the DASSL solver into a static library and also compile the PyDAS wrapper code. 
+
+The batch script ``make_daspk.bat`` has been provided to compile the DASPK3.1
+solver and the DASPK wrapper code.  Make sure the source code for the DASPK3.1
+have been manually downloaded and stored inside the daspk31 folder. See ``daspk31/README`` for details on where to download the files.
 
 .. note:: 
     
